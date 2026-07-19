@@ -5,31 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>gIAm - Train Smarter</title>
     <style>
-        :root {
-            --bg-color: #0d0f12;
-            --panel-bg: #1a1d24;
-            --neon-cyan: #00f0ff;
-            --neon-purple: #9d00ff;
-            --text-main: #ffffff;
-            --text-muted: #8892b0;
-        }
+        :root { --bg-color: #0d0f12; --panel-bg: #1a1d24; --neon-cyan: #00f0ff; --neon-purple: #9d00ff; --text-main: #ffffff; --text-muted: #8892b0; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; text-align: center; }
         
-        header img { max-width: 180px; margin-bottom: 10px; }
-        .subtitle { color: var(--text-muted); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 30px; }
+        header img { max-width: 150px; margin-bottom: 5px; }
+        .subtitle { color: var(--text-muted); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
         
-        #rutinas-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .panel { background-color: var(--panel-bg); border-radius: 15px; padding: 20px; margin-bottom: 20px; text-align: left; }
+        .btn-rutina { width: 100%; padding: 20px; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; color: #fff; background-color: var(--panel-bg); border: 2px solid var(--neon-cyan); border-radius: 12px; cursor: pointer; text-transform: uppercase; }
         
-        .btn-rutina {
-            width: 100%; padding: 20px; font-size: 1.2rem; font-weight: bold;
-            color: #fff; background-color: var(--panel-bg);
-            border: 2px solid var(--neon-cyan); border-radius: 12px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1); transition: 0.3s;
-        }
-        .btn-rutina:hover { background-color: var(--neon-cyan); color: #000; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
+        #workout-view { display: none; }
+        .exercise-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+        .exercise-title { font-size: 1.2rem; color: var(--neon-cyan); font-weight: bold; }
+        .media-link { color: var(--neon-purple); text-decoration: none; font-size: 0.9rem; }
         
-        #loading { color: var(--neon-purple); font-weight: bold; margin-top: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background-color: #000; color: #fff; font-size: 1rem; }
+        
+        .btn-save { width: 100%; padding: 15px; background-color: var(--neon-cyan); color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px; }
+        .btn-next { width: 100%; padding: 10px; background-color: transparent; color: var(--text-muted); border: 1px solid #333; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
+        .btn-finish { width: 100%; padding: 15px; background-color: var(--neon-purple); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        
+        #timer-box { font-size: 2rem; color: var(--neon-cyan); font-weight: bold; margin: 15px 0; display: none; text-align: center; }
+        #sync-status { font-size: 0.8rem; margin-top: 20px; color: var(--text-muted); text-align: center; }
     </style>
 </head>
 <body>
@@ -39,44 +39,192 @@
         <div class="subtitle">Train Smarter</div>
     </header>
 
-    <div>
-        <h2 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 10px;">¿Qué entrenamiento vas a hacer hoy?</h2>
-        <div id="loading">Conectando con tu plan...</div>
-        <div id="rutinas-container"></div>
+    <div id="dashboard">
+        <h2 style="font-size: 1.1rem; margin-bottom: 15px;">Selecciona tu rutina</h2>
+        <div id="rutinas-container">Cargando datos...</div>
     </div>
+
+    <div id="workout-view">
+        <div id="timer-box">01:30</div>
+        
+        <div class="panel">
+            <div class="exercise-header">
+                <span class="exercise-title" id="lbl-ejercicio">Ejercicio</span>
+                <a href="#" id="link-media" target="_blank" class="media-link">Ver Media</a>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Serie</label>
+                    <input type="number" id="input-serie" value="1" min="1">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Reps</label>
+                    <input type="text" id="input-reps" placeholder="0">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Peso (kg)</label>
+                    <input type="text" id="input-peso" placeholder="0">
+                </div>
+            </div>
+            <button class="btn-save" onclick="guardarSerie()">Guardar Serie y Descansar</button>
+            <button class="btn-next" onclick="siguienteEjercicio()">Siguiente Ejercicio ></button>
+        </div>
+        <button class="btn-finish" onclick="finalizarRutina()">Finalizar Entrenamiento</button>
+    </div>
+
+    <div id="sync-status"></div>
 
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwREc08RbJ65onsF4cWOaVcE6OKAupOk-Cc_KdggnkCxZvhJGncAZNHZGMNh4SIk4C7/exec';
+        
+        let datosApp = { rutinas: [], catalogo: [], historial: {} };
+        let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
+        let rutinaActiva = [];
+        let indexEjercicioActual = 0;
+        let timerInterval;
 
-        async function cargarRutinas() {
+        async function inicializar() {
+            actualizarEstadoRed();
             try {
                 const response = await fetch(APPS_SCRIPT_URL);
-                const data = await response.json();
-                
-                document.getElementById('loading').style.display = 'none';
-                const container = document.getElementById('rutinas-container');
-
-                if (data.status === 'ok' && data.rutinas.length > 0) {
-                    data.rutinas.forEach(rutina => {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn-rutina';
-                        btn.innerText = rutina;
-                        btn.onclick = () => iniciarBloque(rutina);
-                        container.appendChild(btn);
-                    });
-                } else {
-                    container.innerHTML = '<p style="color: var(--text-muted);">No hay rutinas cargadas en el catálogo aún.</p>';
-                }
+                datosApp = await response.json();
+                localStorage.setItem('giam_datos', JSON.stringify(datosApp));
+                renderizarRutinas();
             } catch (error) {
-                document.getElementById('loading').innerText = 'Error al cargar rutinas. Verifica la conexión.';
+                const datosGuardados = localStorage.getItem('giam_datos');
+                if (datosGuardados) {
+                    datosApp = JSON.parse(datosGuardados);
+                    renderizarRutinas();
+                } else {
+                    document.getElementById('rutinas-container').innerText = 'Sin conexión y sin datos previos.';
+                }
             }
         }
 
-        function iniciarBloque(nombreRutina) {
-            alert("Seleccionaste: " + nombreRutina + ". En la Etapa 2 abriremos los ejercicios aquí.");
+        function renderizarRutinas() {
+            const container = document.getElementById('rutinas-container');
+            container.innerHTML = '';
+            if (datosApp.rutinas.length > 0) {
+                datosApp.rutinas.forEach(rutina => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-rutina';
+                    btn.innerText = rutina;
+                    btn.onclick = () => iniciarRutina(rutina);
+                    container.appendChild(btn);
+                });
+            } else {
+                container.innerHTML = '<p>No hay rutinas en el catálogo.</p>';
+            }
         }
 
-        cargarRutinas();
+        function iniciarRutina(nombreRutina) {
+            rutinaActiva = datosApp.catalogo.filter(item => item.rutina === nombreRutina).sort((a, b) => a.orden - b.orden);
+            if (rutinaActiva.length === 0) return alert("Esta rutina no tiene ejercicios.");
+            
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('workout-view').style.display = 'block';
+            indexEjercicioActual = 0;
+            cargarEjercicioActivo();
+        }
+
+        function cargarEjercicioActivo() {
+            detenerTimer();
+            const ej = rutinaActiva[indexEjercicioActual];
+            document.getElementById('lbl-ejercicio').innerText = ej.ejercicio;
+            
+            const link = document.getElementById('link-media');
+            if(ej.media) { link.style.display = 'inline'; link.href = ej.media; } 
+            else { link.style.display = 'none'; }
+
+            document.getElementById('input-serie').value = '1';
+            
+            // Autocompletar historial
+            const hist = datosApp.historial[ej.ejercicio];
+            document.getElementById('input-reps').value = hist ? hist.reps : '';
+            document.getElementById('input-peso').value = hist ? hist.peso : '';
+        }
+
+        function siguienteEjercicio() {
+            if (indexEjercicioActual < rutinaActiva.length - 1) {
+                indexEjercicioActual++;
+                cargarEjercicioActivo();
+            } else {
+                alert("Último ejercicio de la rutina. Finaliza cuando estés listo.");
+            }
+        }
+
+        function guardarSerie() {
+            const ej = rutinaActiva[indexEjercicioActual].ejercicio;
+            const serie = document.getElementById('input-serie').value;
+            const reps = document.getElementById('input-reps').value;
+            const peso = document.getElementById('input-peso').value;
+
+            if(!reps || !peso) return alert("Ingresa repeticiones y peso.");
+
+            offlineQueue.push({ fecha: new Date().toISOString(), ejercicio: ej, serie: 'Serie ' + serie, repeticiones: reps, peso: peso });
+            localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
+            
+            document.getElementById('input-serie').value = parseInt(serie) + 1;
+            iniciarTimer(90); // 90 segundos de descanso
+            sincronizarDatos();
+        }
+
+        function iniciarTimer(segundos) {
+            detenerTimer();
+            const box = document.getElementById('timer-box');
+            box.style.display = 'block';
+            let restantes = segundos;
+            
+            timerInterval = setInterval(() => {
+                const min = String(Math.floor(restantes / 60)).padStart(2, '0');
+                const sec = String(restantes % 60).padStart(2, '0');
+                box.innerText = `Descanso: ${min}:${sec}`;
+                if (restantes <= 0) { detenerTimer(); box.innerText = "¡A darle!"; }
+                restantes--;
+            }, 1000);
+        }
+
+        function detenerTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-box').style.display = 'none';
+        }
+
+        function finalizarRutina() {
+            document.getElementById('workout-view').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            detenerTimer();
+            alert("¡Entrenamiento guardado!");
+            sincronizarDatos();
+        }
+
+        async function sincronizarDatos() {
+            if (!navigator.onLine || offlineQueue.length === 0) { actualizarEstadoRed(); return; }
+            
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify([...offlineQueue]),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+                if (result.status === 'ok') {
+                    offlineQueue = [];
+                    localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
+                }
+            } catch (e) { console.error(e); }
+            actualizarEstadoRed();
+        }
+
+        function actualizarEstadoRed() {
+            const div = document.getElementById('sync-status');
+            div.innerText = navigator.onLine ? `Online - Pendientes: ${offlineQueue.length}` : `Offline - Guardados: ${offlineQueue.length}`;
+        }
+
+        window.addEventListener('online', sincronizarDatos);
+        window.addEventListener('offline', actualizarEstadoRed);
+        
+        inicializar();
     </script>
 </body>
 </html>
