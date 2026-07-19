@@ -7,39 +7,65 @@
     <style>
         :root { --bg-color: #0d0f12; --panel-bg: #1a1d24; --neon-cyan: #00f0ff; --neon-purple: #9d00ff; --text-main: #ffffff; --text-muted: #8892b0; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; text-align: center; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 80px; }
         
+        header { text-align: center; }
         header img { max-width: 150px; margin-bottom: 5px; }
         .subtitle { color: var(--text-muted); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
         
-        .panel { background-color: var(--panel-bg); border-radius: 15px; padding: 20px; margin-bottom: 20px; text-align: left; }
+        /* Dashboard */
+        #dashboard { text-align: center; }
         .btn-rutina { width: 100%; padding: 20px; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; color: #fff; background-color: var(--panel-bg); border: 2px solid var(--neon-cyan); border-radius: 12px; cursor: pointer; text-transform: uppercase; }
         
+        /* Workout View */
         #workout-view { display: none; }
-        .exercise-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
-        .exercise-title { font-size: 1.2rem; color: var(--neon-cyan); font-weight: bold; }
         
-        .media-thumbnail { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--neon-purple); cursor: pointer; display: none; }
-        
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
-        input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background-color: #000; color: #fff; font-size: 1rem; }
-        
-        .btn-save { width: 100%; padding: 15px; background-color: var(--neon-cyan); color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px; }
-        .btn-next { width: 100%; padding: 10px; background-color: transparent; color: var(--text-muted); border: 1px solid #333; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
-        .btn-finish { width: 100%; padding: 15px; background-color: var(--neon-purple); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
-        
-        #timer-box { font-size: 2rem; color: var(--neon-cyan); font-weight: bold; margin: 15px 0; display: none; text-align: center; }
-        
-        #active-timer-box { background-color: #000; border: 1px solid var(--neon-purple); border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: center; display: none; }
-        #active-timer-display { font-size: 2.5rem; color: var(--neon-purple); font-weight: bold; }
-        .btn-stop-timer { margin-top: 10px; padding: 8px 15px; background: transparent; border: 1px solid var(--text-muted); color: var(--text-main); border-radius: 5px; cursor: pointer; }
+        /* Progress Bar */
+        .progress-container { width: 100%; background-color: #333; border-radius: 10px; margin-bottom: 20px; overflow: hidden; height: 10px; }
+        .progress-bar { height: 100%; background-color: var(--neon-cyan); width: 0%; transition: width 0.3s; }
+        .progress-text { text-align: right; font-size: 0.8rem; color: var(--neon-cyan); margin-bottom: 15px; font-weight: bold; }
 
-        #sync-status { font-size: 0.8rem; margin-top: 20px; color: var(--text-muted); text-align: center; }
+        /* Exercise Cards */
+        .exercise-card { background-color: var(--panel-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #333; transition: border-color 0.3s; }
+        .exercise-card.active { border-left-color: var(--neon-cyan); }
+        .exercise-card.completed { border-left-color: var(--neon-purple); opacity: 0.8; }
+        
+        .ex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; }
+        .ex-title { font-size: 1.1rem; font-weight: bold; color: #fff; }
+        .media-thumbnail { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--neon-purple); display: none; }
+        
+        .ex-body { display: none; padding-top: 10px; border-top: 1px solid #333; }
+        .ex-body.open { display: block; }
+        
+        .history-tag { font-size: 0.8rem; color: var(--neon-purple); margin-bottom: 10px; display: block; }
+        
+        /* Inputs */
+        .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .input-group { flex: 1; }
+        .input-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #444; background-color: #000; color: #fff; font-size: 0.9rem; }
+        
+        /* Timers */
+        .btn-timer-start { width: 100%; padding: 10px; background-color: transparent; border: 1px solid var(--neon-purple); color: var(--neon-purple); border-radius: 6px; margin-bottom: 10px; cursor: pointer; display: none; font-weight: bold; }
+        .active-timer-display { font-size: 2rem; text-align: center; color: var(--neon-purple); font-weight: bold; margin: 10px 0; display: none; }
+        
+        /* Log & Actions */
+        .btn-save { width: 100%; padding: 12px; background-color: var(--neon-cyan); color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .series-log { background-color: #0d0f12; border-radius: 6px; padding: 10px; font-size: 0.85rem; color: #ccc; }
+        .log-item { display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding: 4px 0; }
+        .log-item:last-child { border-bottom: none; }
+        
+        /* Fixed Footer */
+        .workout-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--panel-bg); padding: 15px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .btn-finish { padding: 12px 20px; background-color: var(--neon-purple); color: #fff; border: none; border-radius: 8px; font-weight: bold; flex: 1; }
+        
+        #global-rest-timer { font-size: 1.5rem; color: var(--neon-cyan); font-weight: bold; margin-right: 15px; display: none; }
+        #sync-status { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; }
 
-        #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        /* Modal */
+        #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
         #media-modal img { max-width: 95%; max-height: 80%; border-radius: 10px; border: 2px solid var(--neon-cyan); }
-        .close-modal { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 3rem; font-weight: bold; cursor: pointer; }
+        .close-modal { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 3rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -50,49 +76,24 @@
     </header>
 
     <div id="dashboard">
-        <h2 style="font-size: 1.1rem; margin-bottom: 15px;">Selecciona tu rutina</h2>
         <div id="rutinas-container">Cargando datos...</div>
+        <div id="sync-status"></div>
     </div>
 
     <div id="workout-view">
-        <div id="timer-box">01:30</div>
+        <div class="progress-text"><span id="progress-text-val">0</span>% Completado</div>
+        <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
         
-        <div class="panel">
-            <div class="exercise-header">
-                <span class="exercise-title" id="lbl-ejercicio">Ejercicio</span>
-                <img id="img-thumbnail" class="media-thumbnail" src="" alt="Muestra" onclick="abrirModal()">
-            </div>
-            
-            <div id="active-timer-box">
-                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Tiempo en curso</div>
-                <div id="active-timer-display">00:00</div>
-                <button class="btn-stop-timer" onclick="detenerTimerActivo()">Detener Cronómetro</button>
-            </div>
+        <div id="exercise-list"></div>
 
-            <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Serie</label>
-                    <input type="text" id="input-serie" value="1">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Reps / Min</label>
-                    <input type="text" id="input-reps" placeholder="0">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Peso (kg)</label>
-                    <input type="text" id="input-peso" placeholder="0">
-                </div>
-            </div>
-            <button class="btn-save" onclick="guardarSerie()">Guardar Serie y Descansar</button>
-            <button class="btn-next" onclick="siguienteEjercicio()">Siguiente Ejercicio ></button>
+        <div class="workout-footer">
+            <div id="global-rest-timer">00:00</div>
+            <button class="btn-finish" onclick="finalizarRutina()">Finalizar Entrenamiento</button>
         </div>
-        <button class="btn-finish" onclick="finalizarRutina()">Finalizar Entrenamiento</button>
     </div>
 
-    <div id="sync-status"></div>
-
-    <div id="media-modal">
-        <span class="close-modal" onclick="cerrarModal()">&times;</span>
+    <div id="media-modal" onclick="cerrarModal()">
+        <span class="close-modal">&times;</span>
         <img id="modal-img" src="" alt="Vista ampliada">
     </div>
 
@@ -102,9 +103,15 @@
         let datosApp = { rutinas: [], catalogo: [], historial: {} };
         let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
         let rutinaActiva = [];
-        let indexEjercicioActual = 0;
-        let timerDescanso;
-        let timerActivo;
+        let seriesLog = {}; 
+        let globalRestInterval;
+        let activeTimers = {}; 
+
+        function convertirUrlDrive(url) {
+            if (!url) return '';
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            return match ? 'https://drive.google.com/uc?id=' + match[1] : url;
+        }
 
         async function inicializar() {
             actualizarEstadoRed();
@@ -114,13 +121,9 @@
                 localStorage.setItem('giam_datos', JSON.stringify(datosApp));
                 renderizarRutinas();
             } catch (error) {
-                const datosGuardados = localStorage.getItem('giam_datos');
-                if (datosGuardados) {
-                    datosApp = JSON.parse(datosGuardados);
-                    renderizarRutinas();
-                } else {
-                    document.getElementById('rutinas-container').innerText = 'Sin conexión y sin datos previos.';
-                }
+                const guardados = localStorage.getItem('giam_datos');
+                if (guardados) { datosApp = JSON.parse(guardados); renderizarRutinas(); } 
+                else { document.getElementById('rutinas-container').innerText = 'Sin conexión y sin datos previos.'; }
             }
         }
 
@@ -130,170 +133,229 @@
             if (datosApp.rutinas && datosApp.rutinas.length > 0) {
                 datosApp.rutinas.forEach(rutina => {
                     const btn = document.createElement('button');
-                    btn.className = 'btn-rutina';
-                    btn.innerText = rutina;
+                    btn.className = 'btn-rutina'; btn.innerText = rutina;
                     btn.onclick = () => iniciarRutina(rutina);
                     container.appendChild(btn);
                 });
-            } else {
-                container.innerHTML = '<p>No hay rutinas en el catálogo.</p>';
             }
         }
 
         function iniciarRutina(nombreRutina) {
             rutinaActiva = datosApp.catalogo.filter(item => item.rutina === nombreRutina).sort((a, b) => a.orden - b.orden);
-            if (rutinaActiva.length === 0) return alert("Esta rutina no tiene ejercicios.");
+            if (rutinaActiva.length === 0) return alert("Rutina sin ejercicios.");
             
+            seriesLog = {};
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('workout-view').style.display = 'block';
-            indexEjercicioActual = 0;
-            cargarEjercicioActivo();
+            actualizarProgreso();
+            renderizarLista();
         }
 
-        function cargarEjercicioActivo() {
-            detenerTimerDescanso();
-            detenerTimerActivo();
-            const ej = rutinaActiva[indexEjercicioActual];
-            document.getElementById('lbl-ejercicio').innerText = ej.ejercicio;
+        function renderizarLista() {
+            const list = document.getElementById('exercise-list');
+            list.innerHTML = '';
             
-            const imgThumb = document.getElementById('img-thumbnail');
-            if(ej.media && ej.media.includes('http')) { 
-                imgThumb.src = ej.media;
-                document.getElementById('modal-img').src = ej.media;
-                imgThumb.style.display = 'block'; 
-            } else { 
-                imgThumb.style.display = 'none'; 
+            rutinaActiva.forEach((ej, index) => {
+                const hist = datosApp.historial[ej.ejercicio] || { serie: '1', valor: '', peso: '', unidad: 'repeticiones' };
+                const imgUrl = convertirUrlDrive(ej.media);
+                
+                const card = document.createElement('div');
+                card.className = 'exercise-card';
+                card.id = `card-${index}`;
+                
+                let bodyHtml = `
+                    <div class="ex-header" onclick="toggleBody(${index})">
+                        <span class="ex-title">${ej.ejercicio}</span>
+                        <img src="${imgUrl}" class="media-thumbnail" style="${imgUrl ? 'display:block;' : ''}" onclick="event.stopPropagation(); abrirModal('${imgUrl}')">
+                    </div>
+                    <div class="ex-body" id="body-${index}">
+                        <span class="history-tag">Último: Serie ${hist.serie} | ${hist.valor} ${hist.unidad} | ${hist.peso} kg</span>
+                        
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Serie</label>
+                                <input type="text" id="serie-${index}" value="1">
+                            </div>
+                            <div class="input-group">
+                                <label>Valor</label>
+                                <input type="number" id="valor-${index}" value="${hist.valor}">
+                            </div>
+                            <div class="input-group">
+                                <label>Unidad</label>
+                                <select id="unidad-${index}" onchange="toggleTimerBtn(${index})">
+                                    <option value="repeticiones" ${hist.unidad === 'repeticiones' ? 'selected' : ''}>Reps</option>
+                                    <option value="minutos" ${hist.unidad === 'minutos' ? 'selected' : ''}>Min</option>
+                                    <option value="segundos" ${hist.unidad === 'segundos' ? 'selected' : ''}>Seg</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Peso (kg)</label>
+                                <input type="text" id="peso-${index}" value="${hist.peso}">
+                            </div>
+                        </div>
+
+                        <button id="btn-timer-${index}" class="btn-timer-start" onclick="iniciarTimerActivo(${index})">▶ Iniciar Cronómetro</button>
+                        <div id="display-timer-${index}" class="active-timer-display">00:00</div>
+
+                        <button class="btn-save" onclick="guardarSerie(${index})">Guardar Serie</button>
+                        <div class="series-log" id="log-${index}"></div>
+                    </div>
+                `;
+                card.innerHTML = bodyHtml;
+                list.appendChild(card);
+                toggleTimerBtn(index); // Verifica si debe mostrar el boton de cronometro al crear
+            });
+        }
+
+        function toggleBody(index) {
+            const body = document.getElementById(`body-${index}`);
+            const card = document.getElementById(`card-${index}`);
+            const isOpen = body.classList.contains('open');
+            
+            document.querySelectorAll('.ex-body').forEach(b => b.classList.remove('open'));
+            document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('active'));
+            
+            if (!isOpen) {
+                body.classList.add('open');
+                card.classList.add('active');
             }
+        }
 
-            const hist = datosApp.historial[ej.ejercicio];
-            const prevSerie = hist && hist.serie ? hist.serie : '1';
-            const prevReps = hist && hist.reps ? String(hist.reps) : '';
+        function toggleTimerBtn(index) {
+            const unidad = document.getElementById(`unidad-${index}`).value;
+            const btn = document.getElementById(`btn-timer-${index}`);
+            if(unidad === 'minutos' || unidad === 'segundos') { btn.style.display = 'block'; } 
+            else { btn.style.display = 'none'; detenerTimerActivo(index); }
+        }
+
+        function iniciarTimerActivo(index) {
+            detenerTimerActivo(index);
+            const valor = parseInt(document.getElementById(`valor-${index}`).value) || 0;
+            const unidad = document.getElementById(`unidad-${index}`).value;
+            if(valor <= 0) return alert("Ingresa un valor válido de tiempo");
+
+            let segundosTotales = unidad === 'minutos' ? valor * 60 : valor;
+            const display = document.getElementById(`display-timer-${index}`);
+            const btn = document.getElementById(`btn-timer-${index}`);
             
-            document.getElementById('input-serie').value = prevSerie;
-            document.getElementById('input-reps').value = prevReps;
-            document.getElementById('input-peso').value = hist && hist.peso ? hist.peso : '';
+            btn.innerText = '⏹ Detener Cronómetro';
+            btn.onclick = () => detenerTimerActivo(index);
+            display.style.display = 'block';
 
-            document.getElementById('active-timer-box').style.display = 'none';
-
-            if (prevReps.includes('min')) {
-                const minutos = parseInt(prevReps.replace(/\D/g, ''));
-                if (!isNaN(minutos) && minutos > 0) {
-                    iniciarTimerActivo(minutos * 60);
+            activeTimers[index] = setInterval(() => {
+                const m = String(Math.floor(segundosTotales / 60)).padStart(2, '0');
+                const s = String(segundosTotales % 60).padStart(2, '0');
+                display.innerText = `${m}:${s}`;
+                if (segundosTotales <= 0) {
+                    detenerTimerActivo(index);
+                    alert("¡Tiempo cumplido!");
                 }
+                segundosTotales--;
+            }, 1000);
+        }
+
+        function detenerTimerActivo(index) {
+            clearInterval(activeTimers[index]);
+            const display = document.getElementById(`display-timer-${index}`);
+            const btn = document.getElementById(`btn-timer-${index}`);
+            if(display) display.style.display = 'none';
+            if(btn) {
+                btn.innerText = '▶ Iniciar Cronómetro';
+                btn.onclick = () => iniciarTimerActivo(index);
             }
         }
 
-        function abrirModal() { document.getElementById('media-modal').style.display = 'flex'; }
-        function cerrarModal() { document.getElementById('media-modal').style.display = 'none'; }
+        function guardarSerie(index) {
+            const ej = rutinaActiva[index].ejercicio;
+            const serieInp = document.getElementById(`serie-${index}`);
+            const valorInp = document.getElementById(`valor-${index}`).value;
+            const unidadInp = document.getElementById(`unidad-${index}`).value;
+            const pesoInp = document.getElementById(`peso-${index}`).value;
+            const serieVal = serieInp.value;
 
-        function siguienteEjercicio() {
-            if (indexEjercicioActual < rutinaActiva.length - 1) {
-                indexEjercicioActual++;
-                cargarEjercicioActivo();
-            } else {
-                alert("Último ejercicio de la rutina. Finaliza cuando estés listo.");
-            }
-        }
+            if(!valorInp) return alert("Falta el valor (reps/tiempo).");
 
-        function guardarSerie() {
-            const ej = rutinaActiva[indexEjercicioActual].ejercicio;
-            const serie = document.getElementById('input-serie').value;
-            const reps = document.getElementById('input-reps').value;
-            const peso = document.getElementById('input-peso').value;
-
-            if(!reps || !peso) return alert("Ingresa repeticiones y peso.");
-
-            offlineQueue.push({ fecha: new Date().toISOString(), ejercicio: ej, serie: serie, repeticiones: reps, peso: peso });
+            const record = { fecha: new Date().toISOString(), ejercicio: ej, serie: serieVal, valor: valorInp, peso: pesoInp || 'N/A', unidad: unidadInp };
+            offlineQueue.push(record);
             localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
             
-            const numSerie = parseInt(serie.replace(/\D/g, ''));
-            if (!isNaN(numSerie)) {
-                document.getElementById('input-serie').value = 'Serie ' + (numSerie + 1);
-            } else {
-                document.getElementById('input-serie').value = serie; 
-            }
-            
-            detenerTimerActivo();
-            iniciarTimerDescanso(90); 
+            // Actualizar log visual de la tarjeta
+            if(!seriesLog[ej]) seriesLog[ej] = [];
+            seriesLog[ej].push(record);
+            renderizarLog(index, ej);
+
+            // Preparar siguiente serie
+            const numSerie = parseInt(serieVal.replace(/\D/g, ''));
+            if (!isNaN(numSerie)) { serieInp.value = 'Serie ' + (numSerie + 1); }
+
+            detenerTimerActivo(index);
+            iniciarDescansoGlobal(90);
+            actualizarProgreso();
             sincronizarDatos();
+            document.getElementById(`card-${index}`).classList.add('completed');
         }
 
-        function iniciarTimerActivo(segundos) {
-            document.getElementById('active-timer-box').style.display = 'block';
-            const display = document.getElementById('active-timer-display');
-            let restantes = segundos;
-            
-            timerActivo = setInterval(() => {
-                const m = String(Math.floor(restantes / 60)).padStart(2, '0');
-                const s = String(restantes % 60).padStart(2, '0');
-                display.innerText = `${m}:${s}`;
-                if (restantes <= 0) { 
-                    detenerTimerActivo(); 
-                    alert("¡Tiempo cumplido!"); 
-                }
-                restantes--;
-            }, 1000);
+        function renderizarLog(index, ejNombre) {
+            const logContainer = document.getElementById(`log-${index}`);
+            logContainer.innerHTML = seriesLog[ejNombre].map(s => 
+                `<div class="log-item"><span>${s.serie}</span><span>${s.valor} ${s.unidad}</span><span>${s.peso} kg</span></div>`
+            ).join('');
         }
 
-        function detenerTimerActivo() {
-            clearInterval(timerActivo);
+        function actualizarProgreso() {
+            const completados = Object.keys(seriesLog).length;
+            const total = rutinaActiva.length;
+            const porcentaje = total === 0 ? 0 : Math.round((completados / total) * 100);
+            document.getElementById('progress-bar').style.width = `${porcentaje}%`;
+            document.getElementById('progress-text-val').innerText = porcentaje;
         }
 
-        function iniciarTimerDescanso(segundos) {
-            detenerTimerDescanso();
-            const box = document.getElementById('timer-box');
+        function iniciarDescansoGlobal(segundos) {
+            clearInterval(globalRestInterval);
+            const box = document.getElementById('global-rest-timer');
             box.style.display = 'block';
-            let restantes = segundos;
+            let rest = segundos;
             
-            timerDescanso = setInterval(() => {
-                const min = String(Math.floor(restantes / 60)).padStart(2, '0');
-                const sec = String(restantes % 60).padStart(2, '0');
-                box.innerText = `Descanso: ${min}:${sec}`;
-                if (restantes <= 0) { detenerTimerDescanso(); box.innerText = "¡A darle!"; }
-                restantes--;
+            globalRestInterval = setInterval(() => {
+                const m = String(Math.floor(rest / 60)).padStart(2, '0');
+                const s = String(rest % 60).padStart(2, '0');
+                box.innerText = `Descanso ${m}:${s}`;
+                if (rest <= 0) { clearInterval(globalRestInterval); box.innerText = "¡Dale!"; setTimeout(()=>box.style.display='none', 3000); }
+                rest--;
             }, 1000);
-        }
-
-        function detenerTimerDescanso() {
-            clearInterval(timerDescanso);
-            document.getElementById('timer-box').style.display = 'none';
         }
 
         function finalizarRutina() {
+            if(!confirm("¿Seguro que deseas finalizar el entrenamiento?")) return;
             document.getElementById('workout-view').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            detenerTimerDescanso();
-            detenerTimerActivo();
-            alert("¡Entrenamiento guardado!");
+            clearInterval(globalRestInterval);
+            document.getElementById('global-rest-timer').style.display = 'none';
             sincronizarDatos();
         }
 
+        function abrirModal(src) { document.getElementById('modal-img').src = src; document.getElementById('media-modal').style.display = 'flex'; }
+        function cerrarModal() { document.getElementById('media-modal').style.display = 'none'; }
+
         async function sincronizarDatos() {
             if (!navigator.onLine || offlineQueue.length === 0) { actualizarEstadoRed(); return; }
-            
             try {
                 const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify([...offlineQueue]),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    method: 'POST', body: JSON.stringify([...offlineQueue]), headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
-                const result = await response.json();
-                if (result.status === 'ok') {
-                    offlineQueue = [];
-                    localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
+                if ((await response.json()).status === 'ok') {
+                    offlineQueue = []; localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {}
             actualizarEstadoRed();
         }
 
         function actualizarEstadoRed() {
-            const div = document.getElementById('sync-status');
-            div.innerText = navigator.onLine ? `Online - Pendientes: ${offlineQueue.length}` : `Offline - Guardados: ${offlineQueue.length}`;
+            document.getElementById('sync-status').innerText = navigator.onLine ? `Sincronizado. Pendientes: ${offlineQueue.length}` : `Offline. Guardados: ${offlineQueue.length}`;
         }
 
         window.addEventListener('online', sincronizarDatos);
         window.addEventListener('offline', actualizarEstadoRed);
-        
         inicializar();
     </script>
 </body>
