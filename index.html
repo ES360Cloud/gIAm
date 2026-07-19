@@ -18,7 +18,9 @@
         #workout-view { display: none; }
         .exercise-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
         .exercise-title { font-size: 1.2rem; color: var(--neon-cyan); font-weight: bold; }
-        .media-link { color: var(--neon-purple); text-decoration: none; font-size: 0.9rem; }
+        
+        /* Estilos para la miniatura de la imagen */
+        .media-thumbnail { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--neon-purple); cursor: pointer; display: none; }
         
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
@@ -30,6 +32,11 @@
         
         #timer-box { font-size: 2rem; color: var(--neon-cyan); font-weight: bold; margin: 15px 0; display: none; text-align: center; }
         #sync-status { font-size: 0.8rem; margin-top: 20px; color: var(--text-muted); text-align: center; }
+
+        /* Estilos para el Modal de Imagen Pantalla Completa */
+        #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        #media-modal img { max-width: 95%; max-height: 80%; border-radius: 10px; border: 2px solid var(--neon-cyan); }
+        .close-modal { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 3rem; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -50,7 +57,7 @@
         <div class="panel">
             <div class="exercise-header">
                 <span class="exercise-title" id="lbl-ejercicio">Ejercicio</span>
-                <a href="#" id="link-media" target="_blank" class="media-link">Ver Media</a>
+                <img id="img-thumbnail" class="media-thumbnail" src="" alt="Muestra" onclick="abrirModal()">
             </div>
             
             <div style="display: flex; gap: 10px;">
@@ -75,6 +82,12 @@
 
     <div id="sync-status"></div>
 
+    <!-- Modal de Imagen -->
+    <div id="media-modal">
+        <span class="close-modal" onclick="cerrarModal()">&times;</span>
+        <img id="modal-img" src="" alt="Vista ampliada">
+    </div>
+
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwREc08RbJ65onsF4cWOaVcE6OKAupOk-Cc_KdggnkCxZvhJGncAZNHZGMNh4SIk4C7/exec';
         
@@ -83,6 +96,16 @@
         let rutinaActiva = [];
         let indexEjercicioActual = 0;
         let timerInterval;
+
+        // Convierte link de visualización de Drive a link de imagen directa
+        function convertirUrlDrive(url) {
+            if (!url) return '';
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return 'https://drive.google.com/uc?id=' + match[1];
+            }
+            return url;
+        }
 
         async function inicializar() {
             actualizarEstadoRed();
@@ -105,7 +128,7 @@
         function renderizarRutinas() {
             const container = document.getElementById('rutinas-container');
             container.innerHTML = '';
-            if (datosApp.rutinas.length > 0) {
+            if (datosApp.rutinas && datosApp.rutinas.length > 0) {
                 datosApp.rutinas.forEach(rutina => {
                     const btn = document.createElement('button');
                     btn.className = 'btn-rutina';
@@ -133,17 +156,27 @@
             const ej = rutinaActiva[indexEjercicioActual];
             document.getElementById('lbl-ejercicio').innerText = ej.ejercicio;
             
-            const link = document.getElementById('link-media');
-            if(ej.media) { link.style.display = 'inline'; link.href = ej.media; } 
-            else { link.style.display = 'none'; }
+            // Gestión de la miniatura
+            const imgThumb = document.getElementById('img-thumbnail');
+            if(ej.media && ej.media.includes('drive.google.com')) { 
+                const linkDirecto = convertirUrlDrive(ej.media);
+                imgThumb.src = linkDirecto;
+                document.getElementById('modal-img').src = linkDirecto;
+                imgThumb.style.display = 'block'; 
+            } else { 
+                imgThumb.style.display = 'none'; 
+            }
 
             document.getElementById('input-serie').value = '1';
             
-            // Autocompletar historial
+            // Autocompletar historial desde Registros
             const hist = datosApp.historial[ej.ejercicio];
             document.getElementById('input-reps').value = hist ? hist.reps : '';
             document.getElementById('input-peso').value = hist ? hist.peso : '';
         }
+
+        function abrirModal() { document.getElementById('media-modal').style.display = 'flex'; }
+        function cerrarModal() { document.getElementById('media-modal').style.display = 'none'; }
 
         function siguienteEjercicio() {
             if (indexEjercicioActual < rutinaActiva.length - 1) {
@@ -166,7 +199,7 @@
             localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
             
             document.getElementById('input-serie').value = parseInt(serie) + 1;
-            iniciarTimer(90); // 90 segundos de descanso
+            iniciarTimer(90); 
             sincronizarDatos();
         }
 
