@@ -19,21 +19,24 @@
         .exercise-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
         .exercise-title { font-size: 1.2rem; color: var(--neon-cyan); font-weight: bold; }
         
-        /* Estilos para la miniatura de la imagen */
         .media-thumbnail { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--neon-purple); cursor: pointer; display: none; }
         
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background-color: #000; color: #fff; font-size: 1rem; }
+        input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background-color: #000; color: #fff; font-size: 1rem; }
         
         .btn-save { width: 100%; padding: 15px; background-color: var(--neon-cyan); color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px; }
         .btn-next { width: 100%; padding: 10px; background-color: transparent; color: var(--text-muted); border: 1px solid #333; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
         .btn-finish { width: 100%; padding: 15px; background-color: var(--neon-purple); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
         
         #timer-box { font-size: 2rem; color: var(--neon-cyan); font-weight: bold; margin: 15px 0; display: none; text-align: center; }
+        
+        #active-timer-box { background-color: #000; border: 1px solid var(--neon-purple); border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: center; display: none; }
+        #active-timer-display { font-size: 2.5rem; color: var(--neon-purple); font-weight: bold; }
+        .btn-stop-timer { margin-top: 10px; padding: 8px 15px; background: transparent; border: 1px solid var(--text-muted); color: var(--text-main); border-radius: 5px; cursor: pointer; }
+
         #sync-status { font-size: 0.8rem; margin-top: 20px; color: var(--text-muted); text-align: center; }
 
-        /* Estilos para el Modal de Imagen Pantalla Completa */
         #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
         #media-modal img { max-width: 95%; max-height: 80%; border-radius: 10px; border: 2px solid var(--neon-cyan); }
         .close-modal { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 3rem; font-weight: bold; cursor: pointer; }
@@ -60,13 +63,19 @@
                 <img id="img-thumbnail" class="media-thumbnail" src="" alt="Muestra" onclick="abrirModal()">
             </div>
             
+            <div id="active-timer-box">
+                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Tiempo en curso</div>
+                <div id="active-timer-display">00:00</div>
+                <button class="btn-stop-timer" onclick="detenerTimerActivo()">Detener Cronómetro</button>
+            </div>
+
             <div style="display: flex; gap: 10px;">
                 <div class="form-group" style="flex: 1;">
                     <label>Serie</label>
-                    <input type="number" id="input-serie" value="1" min="1">
+                    <input type="text" id="input-serie" value="1">
                 </div>
                 <div class="form-group" style="flex: 1;">
-                    <label>Reps</label>
+                    <label>Reps / Min</label>
                     <input type="text" id="input-reps" placeholder="0">
                 </div>
                 <div class="form-group" style="flex: 1;">
@@ -82,7 +91,6 @@
 
     <div id="sync-status"></div>
 
-    <!-- Modal de Imagen -->
     <div id="media-modal">
         <span class="close-modal" onclick="cerrarModal()">&times;</span>
         <img id="modal-img" src="" alt="Vista ampliada">
@@ -95,17 +103,8 @@
         let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
         let rutinaActiva = [];
         let indexEjercicioActual = 0;
-        let timerInterval;
-
-        // Convierte link de visualización de Drive a link de imagen directa
-        function convertirUrlDrive(url) {
-            if (!url) return '';
-            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if (match && match[1]) {
-                return 'https://drive.google.com/uc?id=' + match[1];
-            }
-            return url;
-        }
+        let timerDescanso;
+        let timerActivo;
 
         async function inicializar() {
             actualizarEstadoRed();
@@ -152,27 +151,36 @@
         }
 
         function cargarEjercicioActivo() {
-            detenerTimer();
+            detenerTimerDescanso();
+            detenerTimerActivo();
             const ej = rutinaActiva[indexEjercicioActual];
             document.getElementById('lbl-ejercicio').innerText = ej.ejercicio;
             
-            // Gestión de la miniatura
             const imgThumb = document.getElementById('img-thumbnail');
-            if(ej.media && ej.media.includes('drive.google.com')) { 
-                const linkDirecto = convertirUrlDrive(ej.media);
-                imgThumb.src = linkDirecto;
-                document.getElementById('modal-img').src = linkDirecto;
+            if(ej.media && ej.media.includes('http')) { 
+                imgThumb.src = ej.media;
+                document.getElementById('modal-img').src = ej.media;
                 imgThumb.style.display = 'block'; 
             } else { 
                 imgThumb.style.display = 'none'; 
             }
 
-            document.getElementById('input-serie').value = '1';
-            
-            // Autocompletar historial desde Registros
             const hist = datosApp.historial[ej.ejercicio];
-            document.getElementById('input-reps').value = hist ? hist.reps : '';
-            document.getElementById('input-peso').value = hist ? hist.peso : '';
+            const prevSerie = hist && hist.serie ? hist.serie : '1';
+            const prevReps = hist && hist.reps ? String(hist.reps) : '';
+            
+            document.getElementById('input-serie').value = prevSerie;
+            document.getElementById('input-reps').value = prevReps;
+            document.getElementById('input-peso').value = hist && hist.peso ? hist.peso : '';
+
+            document.getElementById('active-timer-box').style.display = 'none';
+
+            if (prevReps.includes('min')) {
+                const minutos = parseInt(prevReps.replace(/\D/g, ''));
+                if (!isNaN(minutos) && minutos > 0) {
+                    iniciarTimerActivo(minutos * 60);
+                }
+            }
         }
 
         function abrirModal() { document.getElementById('media-modal').style.display = 'flex'; }
@@ -195,38 +203,67 @@
 
             if(!reps || !peso) return alert("Ingresa repeticiones y peso.");
 
-            offlineQueue.push({ fecha: new Date().toISOString(), ejercicio: ej, serie: 'Serie ' + serie, repeticiones: reps, peso: peso });
+            offlineQueue.push({ fecha: new Date().toISOString(), ejercicio: ej, serie: serie, repeticiones: reps, peso: peso });
             localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
             
-            document.getElementById('input-serie').value = parseInt(serie) + 1;
-            iniciarTimer(90); 
+            const numSerie = parseInt(serie.replace(/\D/g, ''));
+            if (!isNaN(numSerie)) {
+                document.getElementById('input-serie').value = 'Serie ' + (numSerie + 1);
+            } else {
+                document.getElementById('input-serie').value = serie; 
+            }
+            
+            detenerTimerActivo();
+            iniciarTimerDescanso(90); 
             sincronizarDatos();
         }
 
-        function iniciarTimer(segundos) {
-            detenerTimer();
-            const box = document.getElementById('timer-box');
-            box.style.display = 'block';
+        function iniciarTimerActivo(segundos) {
+            document.getElementById('active-timer-box').style.display = 'block';
+            const display = document.getElementById('active-timer-display');
             let restantes = segundos;
             
-            timerInterval = setInterval(() => {
-                const min = String(Math.floor(restantes / 60)).padStart(2, '0');
-                const sec = String(restantes % 60).padStart(2, '0');
-                box.innerText = `Descanso: ${min}:${sec}`;
-                if (restantes <= 0) { detenerTimer(); box.innerText = "¡A darle!"; }
+            timerActivo = setInterval(() => {
+                const m = String(Math.floor(restantes / 60)).padStart(2, '0');
+                const s = String(restantes % 60).padStart(2, '0');
+                display.innerText = `${m}:${s}`;
+                if (restantes <= 0) { 
+                    detenerTimerActivo(); 
+                    alert("¡Tiempo cumplido!"); 
+                }
                 restantes--;
             }, 1000);
         }
 
-        function detenerTimer() {
-            clearInterval(timerInterval);
+        function detenerTimerActivo() {
+            clearInterval(timerActivo);
+        }
+
+        function iniciarTimerDescanso(segundos) {
+            detenerTimerDescanso();
+            const box = document.getElementById('timer-box');
+            box.style.display = 'block';
+            let restantes = segundos;
+            
+            timerDescanso = setInterval(() => {
+                const min = String(Math.floor(restantes / 60)).padStart(2, '0');
+                const sec = String(restantes % 60).padStart(2, '0');
+                box.innerText = `Descanso: ${min}:${sec}`;
+                if (restantes <= 0) { detenerTimerDescanso(); box.innerText = "¡A darle!"; }
+                restantes--;
+            }, 1000);
+        }
+
+        function detenerTimerDescanso() {
+            clearInterval(timerDescanso);
             document.getElementById('timer-box').style.display = 'none';
         }
 
         function finalizarRutina() {
             document.getElementById('workout-view').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            detenerTimer();
+            detenerTimerDescanso();
+            detenerTimerActivo();
             alert("¡Entrenamiento guardado!");
             sincronizarDatos();
         }
