@@ -5,67 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>gIAm - Train Smarter</title>
     <style>
-        :root { --bg-color: #0d0f12; --panel-bg: #1a1d24; --neon-cyan: #00f0ff; --neon-purple: #9d00ff; --text-main: #ffffff; --text-muted: #8892b0; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 80px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
         
-        header { text-align: center; }
-        header img { max-width: 150px; margin-bottom: 5px; }
-        .subtitle { color: var(--text-muted); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; }
+        :root { --bg-color: #0b0d10; --panel-bg: #15181e; --neon-cyan: #00e5ff; --neon-purple: #a600ff; --text-main: #f0f2f5; --text-muted: #8892b0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 90px; }
         
-        /* Dashboard */
+        header { text-align: center; margin-bottom: 30px; }
+        header img { max-width: 140px; margin-bottom: 5px; }
+        .subtitle { color: var(--text-muted); font-size: 0.75rem; letter-spacing: 4px; text-transform: uppercase; font-weight: 500; }
+        
         #dashboard { text-align: center; }
-        .btn-rutina { width: 100%; padding: 20px; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; color: #fff; background-color: var(--panel-bg); border: 2px solid var(--neon-cyan); border-radius: 12px; cursor: pointer; text-transform: uppercase; }
+        .btn-rutina { width: 100%; padding: 18px; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; color: #fff; background-color: var(--panel-bg); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .btn-rutina:active { transform: scale(0.98); border-color: var(--neon-cyan); }
         
-        /* Workout View */
         #workout-view { display: none; }
         
-        /* Progress Bar */
-        .progress-container { width: 100%; background-color: #333; border-radius: 10px; margin-bottom: 20px; overflow: hidden; height: 10px; }
-        .progress-bar { height: 100%; background-color: var(--neon-cyan); width: 0%; transition: width 0.3s; }
-        .progress-text { text-align: right; font-size: 0.8rem; color: var(--neon-cyan); margin-bottom: 15px; font-weight: bold; }
+        .progress-container { width: 100%; background-color: #222630; border-radius: 8px; margin-bottom: 25px; overflow: hidden; height: 6px; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan)); width: 0%; transition: width 0.4s ease; }
+        .progress-text { text-align: right; font-size: 0.85rem; color: var(--neon-cyan); margin-bottom: 8px; font-weight: 700; }
 
-        /* Exercise Cards */
-        .exercise-card { background-color: var(--panel-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #333; transition: border-color 0.3s; }
-        .exercise-card.active { border-left-color: var(--neon-cyan); }
-        .exercise-card.completed { border-left-color: var(--neon-purple); opacity: 0.8; }
+        .exercise-card { background-color: var(--panel-bg); border-radius: 16px; padding: 18px; margin-bottom: 20px; border-left: 4px solid #2a2f3a; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .exercise-card.active { border-left-color: var(--neon-cyan); background-color: #1a1e25; }
+        .exercise-card.completed { border-left-color: var(--neon-purple); opacity: 0.6; }
         
-        .ex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; cursor: pointer; }
-        .ex-title { font-size: 1.1rem; font-weight: bold; color: #fff; }
-        .media-thumbnail { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--neon-purple); display: none; }
+        .ex-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .ex-title { font-size: 1.15rem; font-weight: 700; color: #fff; }
+        .media-thumbnail { width: 48px; height: 48px; object-fit: cover; border-radius: 10px; border: 2px solid transparent; background-image: linear-gradient(var(--panel-bg), var(--panel-bg)), linear-gradient(45deg, var(--neon-cyan), var(--neon-purple)); background-origin: border-box; background-clip: padding-box, border-box; display: none; }
         
-        .ex-body { display: none; padding-top: 10px; border-top: 1px solid #333; }
+        .ex-body { display: none; padding-top: 15px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
         .ex-body.open { display: block; }
         
-        .history-tag { font-size: 0.8rem; color: var(--neon-purple); margin-bottom: 10px; display: block; }
+        .history-tag { font-size: 0.75rem; color: var(--neon-purple); margin-bottom: 15px; display: inline-block; padding: 4px 8px; background: rgba(166, 0, 255, 0.1); border-radius: 6px; font-weight: 500; }
         
-        /* Inputs */
-        .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 15px; }
         .input-group { flex: 1; }
-        .input-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
-        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #444; background-color: #000; color: #fff; font-size: 0.9rem; }
+        .input-group label { display: block; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 700; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333945; background-color: #0b0d10; color: #fff; font-size: 0.95rem; outline: none; transition: border-color 0.3s; }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--neon-cyan); }
         
-        /* Timers */
-        .btn-timer-start { width: 100%; padding: 10px; background-color: transparent; border: 1px solid var(--neon-purple); color: var(--neon-purple); border-radius: 6px; margin-bottom: 10px; cursor: pointer; display: none; font-weight: bold; }
-        .active-timer-display { font-size: 2rem; text-align: center; color: var(--neon-purple); font-weight: bold; margin: 10px 0; display: none; }
+        .btn-timer-start { width: 100%; padding: 12px; background-color: transparent; border: 1px solid var(--neon-purple); color: var(--neon-purple); border-radius: 8px; margin-bottom: 15px; cursor: pointer; display: none; font-weight: 700; transition: all 0.3s; }
+        .btn-timer-start:active { background-color: rgba(166, 0, 255, 0.1); }
+        .active-timer-display { font-size: 2.2rem; text-align: center; color: var(--neon-purple); font-weight: 700; margin: 10px 0 20px 0; display: none; letter-spacing: 2px; }
         
-        /* Log & Actions */
-        .btn-save { width: 100%; padding: 12px; background-color: var(--neon-cyan); color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
-        .series-log { background-color: #0d0f12; border-radius: 6px; padding: 10px; font-size: 0.85rem; color: #ccc; }
-        .log-item { display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding: 4px 0; }
-        .log-item:last-child { border-bottom: none; }
+        .btn-save { width: 100%; padding: 14px; background-color: rgba(0, 229, 255, 0.05); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 15px; transition: all 0.3s; }
+        .btn-save:active { background-color: var(--neon-cyan); color: #000; }
         
-        /* Fixed Footer */
-        .workout-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--panel-bg); padding: 15px; border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .btn-finish { padding: 12px 20px; background-color: var(--neon-purple); color: #fff; border: none; border-radius: 8px; font-weight: bold; flex: 1; }
-        
-        #global-rest-timer { font-size: 1.5rem; color: var(--neon-cyan); font-weight: bold; margin-right: 15px; display: none; }
-        #sync-status { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; }
+        .btn-close-exercise { width: 100%; padding: 14px; background: linear-gradient(90deg, var(--neon-purple), #7a00cc); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(166, 0, 255, 0.3); transition: transform 0.2s; display: none; }
+        .btn-close-exercise:active { transform: scale(0.98); }
 
-        /* Modal */
+        .series-log { background-color: #0b0d10; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #ddd; border: 1px solid #1f232c; display: none; }
+        .log-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1f232c; }
+        .log-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .action-icons span { cursor: pointer; margin-left: 12px; font-size: 1rem; opacity: 0.7; transition: opacity 0.2s; }
+        .action-icons span:hover { opacity: 1; }
+        
+        .workout-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(21, 24, 30, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .btn-finish { padding: 14px 20px; background-color: transparent; color: var(--text-muted); border: 1px solid #333945; border-radius: 8px; font-weight: 700; flex: 1; transition: all 0.3s; }
+        .btn-finish:active { background-color: #333945; color: #fff; }
+        
+        #global-rest-timer { font-size: 1.4rem; color: var(--neon-cyan); font-weight: 700; margin-right: 20px; display: none; }
+        #sync-status { text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 15px; font-weight: 500; }
+
         #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
-        #media-modal img { max-width: 95%; max-height: 80%; border-radius: 10px; border: 2px solid var(--neon-cyan); }
-        .close-modal { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 3rem; cursor: pointer; }
+        #media-modal img { max-width: 95%; max-height: 80%; border-radius: 12px; border: 2px solid var(--neon-purple); box-shadow: 0 0 30px rgba(166,0,255,0.3); }
+        .close-modal { position: absolute; top: 25px; right: 30px; color: #fff; font-size: 2.5rem; cursor: pointer; font-weight: 300; }
     </style>
 </head>
 <body>
@@ -106,6 +110,7 @@
         let seriesLog = {}; 
         let globalRestInterval;
         let activeTimers = {}; 
+        let ejerciciosCerrados = [];
 
         function convertirUrlDrive(url) {
             if (!url) return '';
@@ -145,10 +150,12 @@
             if (rutinaActiva.length === 0) return alert("Rutina sin ejercicios.");
             
             seriesLog = {};
+            ejerciciosCerrados = [];
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('workout-view').style.display = 'block';
             actualizarProgreso();
             renderizarLista();
+            toggleBody(0);
         }
 
         function renderizarLista() {
@@ -156,7 +163,7 @@
             list.innerHTML = '';
             
             rutinaActiva.forEach((ej, index) => {
-                const hist = datosApp.historial[ej.ejercicio] || { serie: '1', valor: '', peso: '', unidad: 'repeticiones' };
+                const hist = datosApp.historial[ej.ejercicio] || { serie: 'Serie 1', valor: '', peso: '', unidad: 'repeticiones' };
                 const imgUrl = convertirUrlDrive(ej.media);
                 
                 const card = document.createElement('div');
@@ -169,41 +176,45 @@
                         <img src="${imgUrl}" class="media-thumbnail" style="${imgUrl ? 'display:block;' : ''}" onclick="event.stopPropagation(); abrirModal('${imgUrl}')">
                     </div>
                     <div class="ex-body" id="body-${index}">
-                        <span class="history-tag">Último: Serie ${hist.serie} | ${hist.valor} ${hist.unidad} | ${hist.peso} kg</span>
+                        <span class="history-tag">Último: ${hist.serie} | ${hist.valor} ${hist.unidad} | ${hist.peso !== '' ? hist.peso + ' kg' : 'N/A'}</span>
                         
-                        <div class="input-row">
-                            <div class="input-group">
-                                <label>Serie</label>
-                                <input type="text" id="serie-${index}" value="1">
+                        <div id="input-area-${index}">
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Serie</label>
+                                    <input type="text" id="serie-${index}" value="Serie 1">
+                                </div>
+                                <div class="input-group">
+                                    <label>Valor</label>
+                                    <input type="number" id="valor-${index}" value="${hist.valor}">
+                                </div>
+                                <div class="input-group">
+                                    <label>Unidad</label>
+                                    <select id="unidad-${index}" onchange="toggleTimerBtn(${index})">
+                                        <option value="repeticiones" ${hist.unidad === 'repeticiones' ? 'selected' : ''}>Reps</option>
+                                        <option value="minutos" ${hist.unidad === 'minutos' ? 'selected' : ''}>Min</option>
+                                        <option value="segundos" ${hist.unidad === 'segundos' ? 'selected' : ''}>Seg</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>Peso</label>
+                                    <input type="text" id="peso-${index}" value="${hist.peso}">
+                                </div>
                             </div>
-                            <div class="input-group">
-                                <label>Valor</label>
-                                <input type="number" id="valor-${index}" value="${hist.valor}">
-                            </div>
-                            <div class="input-group">
-                                <label>Unidad</label>
-                                <select id="unidad-${index}" onchange="toggleTimerBtn(${index})">
-                                    <option value="repeticiones" ${hist.unidad === 'repeticiones' ? 'selected' : ''}>Reps</option>
-                                    <option value="minutos" ${hist.unidad === 'minutos' ? 'selected' : ''}>Min</option>
-                                    <option value="segundos" ${hist.unidad === 'segundos' ? 'selected' : ''}>Seg</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label>Peso (kg)</label>
-                                <input type="text" id="peso-${index}" value="${hist.peso}">
-                            </div>
+
+                            <button id="btn-timer-${index}" class="btn-timer-start" onclick="iniciarTimerActivo(${index})">▶ Iniciar Cronómetro</button>
+                            <div id="display-timer-${index}" class="active-timer-display">00:00</div>
+
+                            <button class="btn-save" onclick="guardarSerie(${index})">Guardar Serie</button>
                         </div>
-
-                        <button id="btn-timer-${index}" class="btn-timer-start" onclick="iniciarTimerActivo(${index})">▶ Iniciar Cronómetro</button>
-                        <div id="display-timer-${index}" class="active-timer-display">00:00</div>
-
-                        <button class="btn-save" onclick="guardarSerie(${index})">Guardar Serie</button>
+                        
                         <div class="series-log" id="log-${index}"></div>
+                        <button class="btn-close-exercise" id="btn-close-${index}" onclick="cerrarEjercicio(${index})">Cerrar Ejercicio y Sincronizar</button>
                     </div>
                 `;
                 card.innerHTML = bodyHtml;
                 list.appendChild(card);
-                toggleTimerBtn(index); // Verifica si debe mostrar el boton de cronometro al crear
+                toggleTimerBtn(index); 
             });
         }
 
@@ -217,7 +228,9 @@
             
             if (!isOpen) {
                 body.classList.add('open');
-                card.classList.add('active');
+                if(!ejerciciosCerrados.includes(index)) {
+                    card.classList.add('active');
+                }
             }
         }
 
@@ -275,35 +288,94 @@
 
             if(!valorInp) return alert("Falta el valor (reps/tiempo).");
 
-            const record = { fecha: new Date().toISOString(), ejercicio: ej, serie: serieVal, valor: valorInp, peso: pesoInp || 'N/A', unidad: unidadInp };
-            offlineQueue.push(record);
-            localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
+            const record = { 
+                id: Date.now().toString(), 
+                fecha: new Date().toLocaleDateString('es-ES'), 
+                ejercicio: ej, 
+                serie: serieVal, 
+                valor: valorInp, 
+                peso: pesoInp || 'N/A', 
+                unidad: unidadInp 
+            };
             
-            // Actualizar log visual de la tarjeta
             if(!seriesLog[ej]) seriesLog[ej] = [];
             seriesLog[ej].push(record);
+            
+            document.getElementById(`log-${index}`).style.display = 'block';
+            document.getElementById(`btn-close-${index}`).style.display = 'block';
             renderizarLog(index, ej);
 
-            // Preparar siguiente serie
             const numSerie = parseInt(serieVal.replace(/\D/g, ''));
             if (!isNaN(numSerie)) { serieInp.value = 'Serie ' + (numSerie + 1); }
 
             detenerTimerActivo(index);
             iniciarDescansoGlobal(90);
-            actualizarProgreso();
-            sincronizarDatos();
-            document.getElementById(`card-${index}`).classList.add('completed');
         }
 
         function renderizarLog(index, ejNombre) {
             const logContainer = document.getElementById(`log-${index}`);
-            logContainer.innerHTML = seriesLog[ejNombre].map(s => 
-                `<div class="log-item"><span>${s.serie}</span><span>${s.valor} ${s.unidad}</span><span>${s.peso} kg</span></div>`
+            const estaCerrado = ejerciciosCerrados.includes(index);
+            
+            logContainer.innerHTML = seriesLog[ejNombre].map((s, logIdx) => 
+                `<div class="log-item">
+                    <span style="flex:1">${s.serie}</span>
+                    <span style="flex:1; text-align:center">${s.valor} ${s.unidad}</span>
+                    <span style="flex:1; text-align:center">${s.peso !== 'N/A' ? s.peso + ' kg' : 'N/A'}</span>
+                    ${!estaCerrado ? `<div class="action-icons">
+                        <span onclick="editarSerie(${index}, '${ejNombre}', ${logIdx})">✏️</span>
+                        <span onclick="borrarSerie(${index}, '${ejNombre}', ${logIdx})">❌</span>
+                    </div>` : ''}
+                </div>`
             ).join('');
         }
 
+        function borrarSerie(index, ejNombre, logIdx) {
+            seriesLog[ejNombre].splice(logIdx, 1);
+            if(seriesLog[ejNombre].length === 0) {
+                document.getElementById(`log-${index}`).style.display = 'none';
+                document.getElementById(`btn-close-${index}`).style.display = 'none';
+            } else {
+                renderizarLog(index, ejNombre);
+            }
+        }
+
+        function editarSerie(index, ejNombre, logIdx) {
+            const record = seriesLog[ejNombre][logIdx];
+            document.getElementById(`serie-${index}`).value = record.serie;
+            document.getElementById(`valor-${index}`).value = record.valor;
+            document.getElementById(`unidad-${index}`).value = record.unidad;
+            document.getElementById(`peso-${index}`).value = record.peso === 'N/A' ? '' : record.peso;
+            borrarSerie(index, ejNombre, logIdx);
+        }
+
+        function cerrarEjercicio(index) {
+            const ej = rutinaActiva[index].ejercicio;
+            if(!confirm("¿Cerrar y enviar este ejercicio? Ya no podrás editar las series.")) return;
+
+            seriesLog[ej].forEach(record => {
+                offlineQueue.push(record);
+            });
+            localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
+            
+            ejerciciosCerrados.push(index);
+            document.getElementById(`input-area-${index}`).style.display = 'none';
+            document.getElementById(`btn-close-${index}`).style.display = 'none';
+            document.getElementById(`card-${index}`).classList.add('completed');
+            document.getElementById(`card-${index}`).classList.remove('active');
+            renderizarLog(index, ej); 
+            
+            actualizarProgreso();
+            sincronizarDatos();
+
+            if (index + 1 < rutinaActiva.length) {
+                toggleBody(index + 1);
+            } else {
+                alert("¡Último ejercicio completado!");
+            }
+        }
+
         function actualizarProgreso() {
-            const completados = Object.keys(seriesLog).length;
+            const completados = ejerciciosCerrados.length;
             const total = rutinaActiva.length;
             const porcentaje = total === 0 ? 0 : Math.round((completados / total) * 100);
             document.getElementById('progress-bar').style.width = `${porcentaje}%`;
@@ -326,7 +398,7 @@
         }
 
         function finalizarRutina() {
-            if(!confirm("¿Seguro que deseas finalizar el entrenamiento?")) return;
+            if(!confirm("¿Salir del entrenamiento? Asegúrate de haber cerrado todos los ejercicios.")) return;
             document.getElementById('workout-view').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             clearInterval(globalRestInterval);
@@ -351,7 +423,7 @@
         }
 
         function actualizarEstadoRed() {
-            document.getElementById('sync-status').innerText = navigator.onLine ? `Sincronizado. Pendientes: ${offlineQueue.length}` : `Offline. Guardados: ${offlineQueue.length}`;
+            document.getElementById('sync-status').innerText = navigator.onLine ? `Online. Guardadas en sesión: ${offlineQueue.length}` : `Offline. Guardadas en sesión: ${offlineQueue.length}`;
         }
 
         window.addEventListener('online', sincronizarDatos);
