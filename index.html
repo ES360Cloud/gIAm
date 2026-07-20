@@ -5,71 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>gIAm - Train Smarter</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
-        :root { --bg-color: #0b0d10; --panel-bg: #15181e; --neon-cyan: #00e5ff; --neon-purple: #a600ff; --text-main: #f0f2f5; --text-muted: #8892b0; }
+        :root { 
+            --bg-color: #f4f6f9; 
+            --panel-bg: #ffffff; 
+            --primary: #5a2eb8; 
+            --primary-light: #ece5fc;
+            --success: #10b981;
+            --text-main: #111827; 
+            --text-muted: #6b7280; 
+            --border: #e5e7eb;
+        }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 90px; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 100px; }
         
-        header { text-align: center; margin-bottom: 30px; }
-        header img { max-width: 140px; margin-bottom: 5px; }
-        .subtitle { color: var(--text-muted); font-size: 0.75rem; letter-spacing: 4px; text-transform: uppercase; font-weight: 500; }
+        header { text-align: center; margin-bottom: 25px; }
+        header img { max-width: 130px; margin-bottom: 5px; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1)); }
+        .subtitle { color: var(--primary); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
         
-        #dashboard { text-align: center; }
-        .btn-rutina { width: 100%; padding: 18px; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; color: #fff; background-color: var(--panel-bg); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .btn-rutina:active { transform: scale(0.98); border-color: var(--neon-cyan); }
+        /* Dashboard Placeholder */
+        #dashboard { display: block; }
+        .dash-header { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); }
+        .btn-rutina { width: 100%; padding: 18px; margin-bottom: 15px; font-size: 1rem; font-weight: 600; color: var(--text-main); background-color: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); transition: all 0.2s; }
+        .btn-rutina:active { transform: scale(0.98); border-color: var(--primary); }
         
         #workout-view { display: none; }
         
-        .progress-container { width: 100%; background-color: #222630; border-radius: 8px; margin-bottom: 25px; overflow: hidden; height: 6px; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan)); width: 0%; transition: width 0.4s ease; }
-        .progress-text { text-align: right; font-size: 0.85rem; color: var(--neon-cyan); margin-bottom: 8px; font-weight: 700; }
+        /* Progress */
+        .progress-container { width: 100%; background-color: var(--border); border-radius: 8px; margin-bottom: 25px; overflow: hidden; height: 8px; }
+        .progress-bar { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.4s ease; }
+        .progress-text { text-align: right; font-size: 0.85rem; color: var(--primary); margin-bottom: 8px; font-weight: 600; }
 
-        .exercise-card { background-color: var(--panel-bg); border-radius: 16px; padding: 18px; margin-bottom: 20px; border-left: 4px solid #2a2f3a; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .exercise-card.active { border-left-color: var(--neon-cyan); background-color: #1a1e25; }
-        .exercise-card.completed { border-left-color: var(--neon-purple); opacity: 0.6; }
+        /* Exercise Card */
+        .exercise-card { background-color: var(--panel-bg); border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; transition: all 0.3s; }
         
-        .ex-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .ex-title { font-size: 1.15rem; font-weight: 700; color: #fff; }
-        .media-thumbnail { width: 48px; height: 48px; object-fit: cover; border-radius: 10px; border: 2px solid transparent; background-image: linear-gradient(var(--panel-bg), var(--panel-bg)), linear-gradient(45deg, var(--neon-cyan), var(--neon-purple)); background-origin: border-box; background-clip: padding-box, border-box; display: none; }
+        .ex-header { display: flex; justify-content: space-between; align-items: center; padding: 18px; cursor: pointer; background-color: var(--panel-bg); }
+        .ex-title-box { display: flex; flex-direction: column; }
+        .ex-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+        .ex-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+        .media-thumbnail { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); display: none; }
         
-        .ex-body { display: none; padding-top: 15px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .ex-body { display: none; border-top: 1px solid var(--border); background-color: #fafafa; }
         .ex-body.open { display: block; }
         
-        .history-tag { font-size: 0.75rem; color: var(--neon-purple); margin-bottom: 15px; display: inline-block; padding: 4px 8px; background: rgba(166, 0, 255, 0.1); border-radius: 6px; font-weight: 500; }
-        
-        .input-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .input-group { flex: 1; }
-        .input-group label { display: block; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 700; }
-        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333945; background-color: #0b0d10; color: #fff; font-size: 0.95rem; outline: none; transition: border-color 0.3s; }
-        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--neon-cyan); }
-        
-        .btn-timer-start { width: 100%; padding: 12px; background-color: transparent; border: 1px solid var(--neon-purple); color: var(--neon-purple); border-radius: 8px; margin-bottom: 15px; cursor: pointer; display: none; font-weight: 700; transition: all 0.3s; }
-        .btn-timer-start:active { background-color: rgba(166, 0, 255, 0.1); }
-        .active-timer-display { font-size: 2.2rem; text-align: center; color: var(--neon-purple); font-weight: 700; margin: 10px 0 20px 0; display: none; letter-spacing: 2px; }
-        
-        .btn-save { width: 100%; padding: 14px; background-color: rgba(0, 229, 255, 0.05); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 15px; transition: all 0.3s; }
-        .btn-save:active { background-color: var(--neon-cyan); color: #000; }
-        
-        .btn-close-exercise { width: 100%; padding: 14px; background: linear-gradient(90deg, var(--neon-purple), #7a00cc); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(166, 0, 255, 0.3); transition: transform 0.2s; display: none; }
-        .btn-close-exercise:active { transform: scale(0.98); }
+        /* AF Style Rows */
+        .series-header { display: flex; padding: 10px 18px 5px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .col-serie { flex: 0 0 60px; }
+        .col-valor { flex: 1; padding: 0 5px; }
+        .col-peso { flex: 0 0 70px; text-align: center; }
+        .col-action { flex: 0 0 50px; text-align: right; }
 
-        .series-log { background-color: #0b0d10; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #ddd; border: 1px solid #1f232c; display: none; }
-        .log-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1f232c; }
-        .log-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .action-icons span { cursor: pointer; margin-left: 12px; font-size: 1rem; opacity: 0.7; transition: opacity 0.2s; }
-        .action-icons span:hover { opacity: 1; }
+        .series-row { display: flex; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--border); transition: background-color 0.3s; }
+        .series-row.completed { background-color: #f0fdf4; } /* Green tint */
         
-        .workout-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(21, 24, 30, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .btn-finish { padding: 14px 20px; background-color: transparent; color: var(--text-muted); border: 1px solid #333945; border-radius: 8px; font-weight: 700; flex: 1; transition: all 0.3s; }
-        .btn-finish:active { background-color: #333945; color: #fff; }
+        .series-label { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
+        .input-compact { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background-color: #fff; color: var(--text-main); font-size: 0.95rem; text-align: center; outline: none; }
+        .input-compact:focus { border-color: var(--primary); }
+        .select-compact { width: 100%; padding: 8px 4px; border-radius: 6px; border: 1px solid var(--border); background-color: #fff; font-size: 0.8rem; outline: none; margin-top: 4px; }
         
-        #global-rest-timer { font-size: 1.4rem; color: var(--neon-cyan); font-weight: 700; margin-right: 20px; display: none; }
-        #sync-status { text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 15px; font-weight: 500; }
+        .btn-play { width: 36px; height: 36px; border-radius: 50%; border: none; background-color: var(--primary-light); color: var(--primary); display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-play:active { transform: scale(0.9); }
+        .series-row.completed .btn-play { background-color: var(--success); color: #fff; }
 
-        #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
-        #media-modal img { max-width: 95%; max-height: 80%; border-radius: 12px; border: 2px solid var(--neon-purple); box-shadow: 0 0 30px rgba(166,0,255,0.3); }
-        .close-modal { position: absolute; top: 25px; right: 30px; color: #fff; font-size: 2.5rem; cursor: pointer; font-weight: 300; }
+        .btn-add-serie { width: 100%; padding: 15px; background: none; border: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; cursor: pointer; border-bottom: 1px solid var(--border); }
+        
+        /* Timers */
+        .active-timer-display { font-size: 2rem; text-align: center; color: var(--primary); font-weight: 700; margin: 15px 0; display: none; }
+        
+        /* Footer */
+        .workout-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); }
+        .btn-finish { padding: 14px 20px; background-color: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 600; flex: 1; text-align: center; font-size: 1rem; box-shadow: 0 4px 10px rgba(90, 46, 184, 0.3); }
+        .btn-finish:active { transform: scale(0.98); }
+        
+        #global-rest-timer { font-size: 1.2rem; color: var(--text-main); font-weight: 700; margin-right: 20px; display: none; }
+        #sync-status { text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; }
+
+        /* Modal */
+        #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        #media-modal img { max-width: 90%; max-height: 80%; border-radius: 12px; }
+        .close-modal { position: absolute; top: 25px; right: 25px; color: #fff; font-size: 2.5rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -80,19 +96,20 @@
     </header>
 
     <div id="dashboard">
-        <div id="rutinas-container">Cargando datos...</div>
+        <div class="dash-header">Tus Programas</div>
+        <div id="rutinas-container">Cargando catálogo...</div>
         <div id="sync-status"></div>
     </div>
 
     <div id="workout-view">
-        <div class="progress-text"><span id="progress-text-val">0</span>% Completado</div>
+        <div class="progress-text"><span id="progress-text-val">0</span>% Entrenamiento</div>
         <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
         
         <div id="exercise-list"></div>
 
         <div class="workout-footer">
             <div id="global-rest-timer">00:00</div>
-            <button class="btn-finish" onclick="finalizarRutina()">Finalizar Entrenamiento</button>
+            <div class="btn-finish" onclick="finalizarRutina()">Terminar Rutina</div>
         </div>
     </div>
 
@@ -107,10 +124,10 @@
         let datosApp = { rutinas: [], catalogo: [], historial: {} };
         let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
         let rutinaActiva = [];
-        let seriesLog = {}; 
         let globalRestInterval;
         let activeTimers = {}; 
-        let ejerciciosCerrados = [];
+        let seriesTotalesEntrenamiento = 0;
+        let seriesCompletadasEntrenamiento = 0;
 
         function convertirUrlDrive(url) {
             if (!url) return '';
@@ -137,8 +154,9 @@
             container.innerHTML = '';
             if (datosApp.rutinas && datosApp.rutinas.length > 0) {
                 datosApp.rutinas.forEach(rutina => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-rutina'; btn.innerText = rutina;
+                    const btn = document.createElement('div');
+                    btn.className = 'btn-rutina'; 
+                    btn.innerHTML = `<span>${rutina}</span> <span>➔</span>`;
                     btn.onclick = () => iniciarRutina(rutina);
                     container.appendChild(btn);
                 });
@@ -149,12 +167,13 @@
             rutinaActiva = datosApp.catalogo.filter(item => item.rutina === nombreRutina).sort((a, b) => a.orden - b.orden);
             if (rutinaActiva.length === 0) return alert("Rutina sin ejercicios.");
             
-            seriesLog = {};
-            ejerciciosCerrados = [];
+            seriesTotalesEntrenamiento = 0;
+            seriesCompletadasEntrenamiento = 0;
+            
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('workout-view').style.display = 'block';
-            actualizarProgreso();
             renderizarLista();
+            actualizarProgreso();
             toggleBody(0);
         }
 
@@ -162,222 +181,162 @@
             const list = document.getElementById('exercise-list');
             list.innerHTML = '';
             
-            rutinaActiva.forEach((ej, index) => {
-                const hist = datosApp.historial[ej.ejercicio] || { serie: 'Serie 1', valor: '', peso: '', unidad: 'repeticiones' };
+            rutinaActiva.forEach((ej, indexEj) => {
+                const histList = datosApp.historial[ej.ejercicio] || [{ serie: '1', valor: '', peso: '', unidad: 'repeticiones' }];
+                seriesTotalesEntrenamiento += histList.length;
+
                 const imgUrl = convertirUrlDrive(ej.media);
                 
                 const card = document.createElement('div');
                 card.className = 'exercise-card';
-                card.id = `card-${index}`;
+                card.id = `card-${indexEj}`;
                 
+                let rowsHtml = '';
+                histList.forEach((s, indexSerie) => {
+                    rowsHtml += generarHtmlFilaSerie(indexEj, indexSerie, s.serie, s.valor, s.peso, s.unidad);
+                });
+
                 let bodyHtml = `
-                    <div class="ex-header" onclick="toggleBody(${index})">
-                        <span class="ex-title">${ej.ejercicio}</span>
+                    <div class="ex-header" onclick="toggleBody(${indexEj})">
+                        <div class="ex-title-box">
+                            <span class="ex-title">${ej.ejercicio}</span>
+                            <span class="ex-subtitle" id="subtitle-${indexEj}">${histList.length} series marcadas</span>
+                        </div>
                         <img src="${imgUrl}" class="media-thumbnail" style="${imgUrl ? 'display:block;' : ''}" onclick="event.stopPropagation(); abrirModal('${imgUrl}')">
                     </div>
-                    <div class="ex-body" id="body-${index}">
-                        <span class="history-tag">Último: ${hist.serie} | ${hist.valor} ${hist.unidad} | ${hist.peso !== '' ? hist.peso + ' kg' : 'N/A'}</span>
+                    <div class="ex-body" id="body-${indexEj}">
+                        <div id="display-timer-${indexEj}" class="active-timer-display">00:00</div>
                         
-                        <div id="input-area-${index}">
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label>Serie</label>
-                                    <input type="text" id="serie-${index}" value="Serie 1">
-                                </div>
-                                <div class="input-group">
-                                    <label>Valor</label>
-                                    <input type="number" id="valor-${index}" value="${hist.valor}">
-                                </div>
-                                <div class="input-group">
-                                    <label>Unidad</label>
-                                    <select id="unidad-${index}" onchange="toggleTimerBtn(${index})">
-                                        <option value="repeticiones" ${hist.unidad === 'repeticiones' ? 'selected' : ''}>Reps</option>
-                                        <option value="minutos" ${hist.unidad === 'minutos' ? 'selected' : ''}>Min</option>
-                                        <option value="segundos" ${hist.unidad === 'segundos' ? 'selected' : ''}>Seg</option>
-                                    </select>
-                                </div>
-                                <div class="input-group">
-                                    <label>Peso</label>
-                                    <input type="text" id="peso-${index}" value="${hist.peso}">
-                                </div>
-                            </div>
-
-                            <button id="btn-timer-${index}" class="btn-timer-start" onclick="iniciarTimerActivo(${index})">▶ Iniciar Cronómetro</button>
-                            <div id="display-timer-${index}" class="active-timer-display">00:00</div>
-
-                            <button class="btn-save" onclick="guardarSerie(${index})">Guardar Serie</button>
+                        <div class="series-header">
+                            <div class="col-serie">Serie</div>
+                            <div class="col-valor">Objetivo</div>
+                            <div class="col-peso">kg</div>
+                            <div class="col-action"></div>
                         </div>
-                        
-                        <div class="series-log" id="log-${index}"></div>
-                        <button class="btn-close-exercise" id="btn-close-${index}" onclick="cerrarEjercicio(${index})">Cerrar Ejercicio y Sincronizar</button>
+                        <div id="series-container-${indexEj}">
+                            ${rowsHtml}
+                        </div>
+                        <button class="btn-add-serie" onclick="agregarFilaSerie(${indexEj})">+ Añadir serie</button>
                     </div>
                 `;
                 card.innerHTML = bodyHtml;
                 list.appendChild(card);
-                toggleTimerBtn(index); 
             });
+        }
+
+        function generarHtmlFilaSerie(indexEj, indexSerie, serieNom, valor, peso, unidad) {
+            const numLabel = serieNom.replace(/\D/g, '') || (indexSerie + 1);
+            return `
+                <div class="series-row" id="row-${indexEj}-${indexSerie}">
+                    <div class="col-serie">
+                        <div class="series-label">${numLabel}</div>
+                        <input type="hidden" id="serieNom-${indexEj}-${indexSerie}" value="Serie ${numLabel}">
+                    </div>
+                    <div class="col-valor">
+                        <input type="number" class="input-compact" id="valor-${indexEj}-${indexSerie}" value="${valor}">
+                        <select class="select-compact" id="unidad-${indexEj}-${indexSerie}">
+                            <option value="repeticiones" ${unidad === 'repeticiones' ? 'selected' : ''}>Reps</option>
+                            <option value="minutos" ${unidad === 'minutos' ? 'selected' : ''}>Min</option>
+                            <option value="segundos" ${unidad === 'segundos' ? 'selected' : ''}>Seg</option>
+                        </select>
+                    </div>
+                    <div class="col-peso">
+                        <input type="text" class="input-compact" id="peso-${indexEj}-${indexSerie}" value="${peso}">
+                    </div>
+                    <div class="col-action">
+                        <button class="btn-play" id="btn-play-${indexEj}-${indexSerie}" onclick="ejecutarSerie(${indexEj}, ${indexSerie})">▶</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function agregarFilaSerie(indexEj) {
+            const container = document.getElementById(`series-container-${indexEj}`);
+            const indexSerie = container.children.length;
+            const rowHtml = generarHtmlFilaSerie(indexEj, indexSerie, `Serie ${indexSerie + 1}`, '', '', 'repeticiones');
+            container.insertAdjacentHTML('beforeend', rowHtml);
+            seriesTotalesEntrenamiento++;
+            actualizarProgreso();
+            document.getElementById(`subtitle-${indexEj}`).innerText = `${indexSerie + 1} series marcadas`;
         }
 
         function toggleBody(index) {
             const body = document.getElementById(`body-${index}`);
-            const card = document.getElementById(`card-${index}`);
             const isOpen = body.classList.contains('open');
-            
             document.querySelectorAll('.ex-body').forEach(b => b.classList.remove('open'));
-            document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('active'));
+            if (!isOpen) body.classList.add('open');
+        }
+
+        function ejecutarSerie(indexEj, indexSerie) {
+            const row = document.getElementById(`row-${indexEj}-${indexSerie}`);
+            const btn = document.getElementById(`btn-play-${indexEj}-${indexSerie}`);
             
-            if (!isOpen) {
-                body.classList.add('open');
-                if(!ejerciciosCerrados.includes(index)) {
-                    card.classList.add('active');
-                }
+            // Si ya está completada, la desmarcamos (opcional, permite corrección)
+            if(row.classList.contains('completed')) {
+                row.classList.remove('completed');
+                btn.innerHTML = '▶';
+                document.getElementById(`valor-${indexEj}-${indexSerie}`).disabled = false;
+                document.getElementById(`peso-${indexEj}-${indexSerie}`).disabled = false;
+                document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = false;
+                seriesCompletadasEntrenamiento--;
+                actualizarProgreso();
+                return;
             }
-        }
 
-        function toggleTimerBtn(index) {
-            const unidad = document.getElementById(`unidad-${index}`).value;
-            const btn = document.getElementById(`btn-timer-${index}`);
-            if(unidad === 'minutos' || unidad === 'segundos') { btn.style.display = 'block'; } 
-            else { btn.style.display = 'none'; detenerTimerActivo(index); }
-        }
+            const ej = rutinaActiva[indexEj].ejercicio;
+            const serieVal = document.getElementById(`serieNom-${indexEj}-${indexSerie}`).value;
+            const valorInp = document.getElementById(`valor-${indexEj}-${indexSerie}`).value;
+            const unidadInp = document.getElementById(`unidad-${indexEj}-${indexSerie}`).value;
+            const pesoInp = document.getElementById(`peso-${indexEj}-${indexSerie}`).value;
 
-        function iniciarTimerActivo(index) {
-            detenerTimerActivo(index);
-            const valor = parseInt(document.getElementById(`valor-${index}`).value) || 0;
-            const unidad = document.getElementById(`unidad-${index}`).value;
-            if(valor <= 0) return alert("Ingresa un valor válido de tiempo");
+            if(!valorInp) return alert("Falta el valor (reps/tiempo).");
 
-            let segundosTotales = unidad === 'minutos' ? valor * 60 : valor;
-            const display = document.getElementById(`display-timer-${index}`);
-            const btn = document.getElementById(`btn-timer-${index}`);
+            // Validar Cronómetro si es tiempo
+            if(unidadInp === 'minutos' || unidadInp === 'segundos') {
+                iniciarTimerActivo(indexEj, valorInp, unidadInp);
+            }
+
+            const record = { 
+                id: Date.now().toString(), fecha: new Date().toLocaleDateString('es-ES'), 
+                ejercicio: ej, serie: serieVal, valor: valorInp, peso: pesoInp || 'N/A', unidad: unidadInp 
+            };
             
-            btn.innerText = '⏹ Detener Cronómetro';
-            btn.onclick = () => detenerTimerActivo(index);
+            offlineQueue.push(record);
+            localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
+            
+            // UI Update
+            row.classList.add('completed');
+            btn.innerHTML = '✔';
+            document.getElementById(`valor-${indexEj}-${indexSerie}`).disabled = true;
+            document.getElementById(`peso-${indexEj}-${indexSerie}`).disabled = true;
+            document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = true;
+
+            seriesCompletadasEntrenamiento++;
+            actualizarProgreso();
+            iniciarDescansoGlobal(90);
+            actualizarEstadoRed();
+        }
+
+        function iniciarTimerActivo(indexEj, valor, unidad) {
+            clearInterval(activeTimers[indexEj]);
+            let segundosTotales = unidad === 'minutos' ? valor * 60 : parseInt(valor);
+            const display = document.getElementById(`display-timer-${indexEj}`);
             display.style.display = 'block';
 
-            activeTimers[index] = setInterval(() => {
+            activeTimers[indexEj] = setInterval(() => {
                 const m = String(Math.floor(segundosTotales / 60)).padStart(2, '0');
                 const s = String(segundosTotales % 60).padStart(2, '0');
                 display.innerText = `${m}:${s}`;
                 if (segundosTotales <= 0) {
-                    detenerTimerActivo(index);
-                    alert("¡Tiempo cumplido!");
+                    clearInterval(activeTimers[indexEj]);
+                    display.style.display = 'none';
                 }
                 segundosTotales--;
             }, 1000);
         }
 
-        function detenerTimerActivo(index) {
-            clearInterval(activeTimers[index]);
-            const display = document.getElementById(`display-timer-${index}`);
-            const btn = document.getElementById(`btn-timer-${index}`);
-            if(display) display.style.display = 'none';
-            if(btn) {
-                btn.innerText = '▶ Iniciar Cronómetro';
-                btn.onclick = () => iniciarTimerActivo(index);
-            }
-        }
-
-        function guardarSerie(index) {
-            const ej = rutinaActiva[index].ejercicio;
-            const serieInp = document.getElementById(`serie-${index}`);
-            const valorInp = document.getElementById(`valor-${index}`).value;
-            const unidadInp = document.getElementById(`unidad-${index}`).value;
-            const pesoInp = document.getElementById(`peso-${index}`).value;
-            const serieVal = serieInp.value;
-
-            if(!valorInp) return alert("Falta el valor (reps/tiempo).");
-
-            const record = { 
-                id: Date.now().toString(), 
-                fecha: new Date().toLocaleDateString('es-ES'), 
-                ejercicio: ej, 
-                serie: serieVal, 
-                valor: valorInp, 
-                peso: pesoInp || 'N/A', 
-                unidad: unidadInp 
-            };
-            
-            if(!seriesLog[ej]) seriesLog[ej] = [];
-            seriesLog[ej].push(record);
-            
-            document.getElementById(`log-${index}`).style.display = 'block';
-            document.getElementById(`btn-close-${index}`).style.display = 'block';
-            renderizarLog(index, ej);
-
-            const numSerie = parseInt(serieVal.replace(/\D/g, ''));
-            if (!isNaN(numSerie)) { serieInp.value = 'Serie ' + (numSerie + 1); }
-
-            detenerTimerActivo(index);
-            iniciarDescansoGlobal(90);
-        }
-
-        function renderizarLog(index, ejNombre) {
-            const logContainer = document.getElementById(`log-${index}`);
-            const estaCerrado = ejerciciosCerrados.includes(index);
-            
-            logContainer.innerHTML = seriesLog[ejNombre].map((s, logIdx) => 
-                `<div class="log-item">
-                    <span style="flex:1">${s.serie}</span>
-                    <span style="flex:1; text-align:center">${s.valor} ${s.unidad}</span>
-                    <span style="flex:1; text-align:center">${s.peso !== 'N/A' ? s.peso + ' kg' : 'N/A'}</span>
-                    ${!estaCerrado ? `<div class="action-icons">
-                        <span onclick="editarSerie(${index}, '${ejNombre}', ${logIdx})">✏️</span>
-                        <span onclick="borrarSerie(${index}, '${ejNombre}', ${logIdx})">❌</span>
-                    </div>` : ''}
-                </div>`
-            ).join('');
-        }
-
-        function borrarSerie(index, ejNombre, logIdx) {
-            seriesLog[ejNombre].splice(logIdx, 1);
-            if(seriesLog[ejNombre].length === 0) {
-                document.getElementById(`log-${index}`).style.display = 'none';
-                document.getElementById(`btn-close-${index}`).style.display = 'none';
-            } else {
-                renderizarLog(index, ejNombre);
-            }
-        }
-
-        function editarSerie(index, ejNombre, logIdx) {
-            const record = seriesLog[ejNombre][logIdx];
-            document.getElementById(`serie-${index}`).value = record.serie;
-            document.getElementById(`valor-${index}`).value = record.valor;
-            document.getElementById(`unidad-${index}`).value = record.unidad;
-            document.getElementById(`peso-${index}`).value = record.peso === 'N/A' ? '' : record.peso;
-            borrarSerie(index, ejNombre, logIdx);
-        }
-
-        function cerrarEjercicio(index) {
-            const ej = rutinaActiva[index].ejercicio;
-            if(!confirm("¿Cerrar y enviar este ejercicio? Ya no podrás editar las series.")) return;
-
-            seriesLog[ej].forEach(record => {
-                offlineQueue.push(record);
-            });
-            localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
-            
-            ejerciciosCerrados.push(index);
-            document.getElementById(`input-area-${index}`).style.display = 'none';
-            document.getElementById(`btn-close-${index}`).style.display = 'none';
-            document.getElementById(`card-${index}`).classList.add('completed');
-            document.getElementById(`card-${index}`).classList.remove('active');
-            renderizarLog(index, ej); 
-            
-            actualizarProgreso();
-            sincronizarDatos();
-
-            if (index + 1 < rutinaActiva.length) {
-                toggleBody(index + 1);
-            } else {
-                alert("¡Último ejercicio completado!");
-            }
-        }
-
         function actualizarProgreso() {
-            const completados = ejerciciosCerrados.length;
-            const total = rutinaActiva.length;
-            const porcentaje = total === 0 ? 0 : Math.round((completados / total) * 100);
+            const porcentaje = seriesTotalesEntrenamiento === 0 ? 0 : Math.round((seriesCompletadasEntrenamiento / seriesTotalesEntrenamiento) * 100);
             document.getElementById('progress-bar').style.width = `${porcentaje}%`;
             document.getElementById('progress-text-val').innerText = porcentaje;
         }
@@ -391,14 +350,14 @@
             globalRestInterval = setInterval(() => {
                 const m = String(Math.floor(rest / 60)).padStart(2, '0');
                 const s = String(rest % 60).padStart(2, '0');
-                box.innerText = `Descanso ${m}:${s}`;
-                if (rest <= 0) { clearInterval(globalRestInterval); box.innerText = "¡Dale!"; setTimeout(()=>box.style.display='none', 3000); }
+                box.innerText = `⏳ ${m}:${s}`;
+                if (rest <= 0) { clearInterval(globalRestInterval); box.innerText = "¡Listo!"; setTimeout(()=>box.style.display='none', 3000); }
                 rest--;
             }, 1000);
         }
 
         function finalizarRutina() {
-            if(!confirm("¿Salir del entrenamiento? Asegúrate de haber cerrado todos los ejercicios.")) return;
+            if(!confirm("¿Terminar el entrenamiento y sincronizar?")) return;
             document.getElementById('workout-view').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             clearInterval(globalRestInterval);
@@ -423,7 +382,7 @@
         }
 
         function actualizarEstadoRed() {
-            document.getElementById('sync-status').innerText = navigator.onLine ? `Online. Guardadas en sesión: ${offlineQueue.length}` : `Offline. Guardadas en sesión: ${offlineQueue.length}`;
+            document.getElementById('sync-status').innerText = navigator.onLine ? `Sincronizado. Pendientes: ${offlineQueue.length}` : `Offline. Cola: ${offlineQueue.length}`;
         }
 
         window.addEventListener('online', sincronizarDatos);
