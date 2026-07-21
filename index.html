@@ -15,6 +15,7 @@
             --primary-light: #e6f0fa;
             --accent: #00e5ff;
             --success: #10b981;
+            --danger: #ef4444;
             --text-main: #1e293b; 
             --text-muted: #64748b; 
             --border: #e2e8f0;
@@ -36,6 +37,9 @@
         
         .btn-main-action { width: 100%; padding: 18px; background: linear-gradient(90deg, var(--primary), #0056c7); color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 20px rgba(0, 71, 165, 0.25); transition: transform 0.2s; margin-bottom: 10px; }
         .btn-main-action:active { transform: scale(0.97); }
+        
+        .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: var(--danger) !important; box-shadow: none !important; margin-bottom: 20px; margin-top: 5px; }
+        .btn-cancel:active { background: rgba(239, 68, 68, 0.1) !important; }
 
         .btn-rutina { width: 100%; padding: 18px; margin-bottom: 12px; font-size: 1.05rem; font-weight: 600; color: var(--text-main); background-color: var(--panel-bg); border: 1px solid var(--border); border-radius: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: border-color 0.2s; }
         .btn-rutina:active { border-color: var(--primary); }
@@ -103,6 +107,7 @@
 
     <div id="view-dashboard">
         <button class="btn-main-action" id="btn-start-workout" onclick="navegarA('selector')">+ Iniciar Sesión</button>
+        <button class="btn-main-action btn-cancel" id="btn-cancel-workout" onclick="cancelarEntrenamiento()" style="display:none;">✖ Cancelar Sesión</button>
         <div id="sync-status" style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-bottom: 20px; font-weight: 600;"></div>
         
         <div class="dash-card">
@@ -225,9 +230,11 @@
                 if(entrenamientoEnCurso) {
                     document.getElementById('btn-start-workout').innerText = '▶ Retomar Entrenamiento';
                     document.getElementById('btn-start-workout').onclick = () => navegarA('workout');
+                    document.getElementById('btn-cancel-workout').style.display = 'block';
                 } else {
                     document.getElementById('btn-start-workout').innerText = '+ Iniciar Sesión';
                     document.getElementById('btn-start-workout').onclick = () => navegarA('selector');
+                    document.getElementById('btn-cancel-workout').style.display = 'none';
                 }
                 document.getElementById('view-dashboard').style.display = 'block';
                 document.getElementById('nav-dashboard').classList.add('active');
@@ -240,6 +247,21 @@
                 document.getElementById('nav-history').classList.add('active');
                 if(!historyChart) aplicarFiltro();
             }
+        }
+
+        function cancelarEntrenamiento() {
+            if(!confirm("¿Estás seguro de cancelar? Se perderán las series que hiciste en esta sesión y no se guardarán en tu registro.")) return;
+            
+            entrenamientoEnCurso = false;
+            clearInterval(globalRestInterval);
+            document.getElementById('global-rest-timer').style.display = 'none';
+            
+            // Vaciamos la cola offline para descartar lo que no se haya sincronizado en esta sesión fallida
+            offlineQueue = [];
+            localStorage.setItem('giam_queue', '[]');
+            actualizarEstadoRed();
+            
+            navegarA('dashboard');
         }
 
         function renderizarHeatmap() {
