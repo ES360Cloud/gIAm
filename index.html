@@ -50,9 +50,10 @@
 
         .exercise-card { background-color: var(--panel-bg); border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; }
         .ex-header { display: flex; justify-content: space-between; align-items: center; padding: 18px; cursor: pointer; background-color: var(--panel-bg); }
-        .ex-title-box { display: flex; flex-direction: column; }
+        .ex-title-box { display: flex; flex-direction: column; flex: 1; }
         .ex-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
         .ex-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+        .media-thumbnail { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); margin-left: 15px; display: none; }
         
         .ex-body { display: none; border-top: 1px solid var(--border); background-color: #f8fafc; }
         .ex-body.open { display: block; }
@@ -97,6 +98,10 @@
 
         #view-dashboard, #view-selector, #view-workout, #view-history { display: none; }
         #view-dashboard { display: block; }
+
+        #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        #media-modal img { max-width: 90%; max-height: 80%; border-radius: 12px; }
+        .close-modal { position: absolute; top: 25px; right: 25px; color: #fff; font-size: 2.5rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -169,6 +174,11 @@
         <div class="sheet-data" id="sheet-volumen">Volumen (kg): -</div>
     </div>
 
+    <div id="media-modal" onclick="cerrarModal()">
+        <span class="close-modal">&times;</span>
+        <img id="modal-img" src="" alt="Vista ampliada">
+    </div>
+
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwREc08RbJ65onsF4cWOaVcE6OKAupOk-Cc_KdggnkCxZvhJGncAZNHZGMNh4SIk4C7/exec';
         
@@ -196,6 +206,12 @@
         let seriesCompletadas = 0;
         let chartInstances = [];
         let historyChart;
+
+        function convertirUrlDrive(url) {
+            if (!url) return '';
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            return match ? 'https://drive.google.com/uc?id=' + match[1] : url;
+        }
 
         async function inicializar() {
             actualizarEstadoRed();
@@ -256,7 +272,6 @@
             clearInterval(globalRestInterval);
             document.getElementById('global-rest-timer').style.display = 'none';
             
-            // Vaciamos la cola offline para descartar lo que no se haya sincronizado en esta sesión fallida
             offlineQueue = [];
             localStorage.setItem('giam_queue', '[]');
             actualizarEstadoRed();
@@ -447,12 +462,15 @@
                 let rowsHtml = '';
                 histList.forEach((s, indexSerie) => { rowsHtml += generarHtmlFilaSerie(indexEj, indexSerie, s.serie, s.valor, s.peso, s.unidad); });
 
+                const imgUrl = convertirUrlDrive(ej.media);
+
                 card.innerHTML = `
                     <div class="ex-header" onclick="toggleBody(${indexEj})">
                         <div class="ex-title-box">
                             <span class="ex-title">${ej.ejercicio}</span>
                             <span class="ex-subtitle" id="subtitle-${indexEj}">${histList.length} series marcadas</span>
                         </div>
+                        <img src="${imgUrl}" class="media-thumbnail" style="${imgUrl ? 'display:block;' : 'display:none;'}" onclick="event.stopPropagation(); abrirModal('${imgUrl}')">
                     </div>
                     <div class="ex-body" id="body-${indexEj}">
                         <div id="display-timer-${indexEj}" class="active-timer-display">00:00</div>
@@ -577,6 +595,15 @@
 
         function actualizarEstadoRed() {
             document.getElementById('sync-status').innerText = navigator.onLine ? `Sincronizado. Pendientes: ${offlineQueue.length}` : `Sin conexión. Cola: ${offlineQueue.length}`;
+        }
+
+        function abrirModal(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('media-modal').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('media-modal').style.display = 'none';
         }
 
         window.addEventListener('online', sincronizarDatos);
