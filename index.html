@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>gIAm - Train Smarter</title>
+    <link rel="icon" href="https://i.ibb.co/b5dGPGjH/solo-logo-transparente-sin-nombre.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
@@ -21,24 +23,28 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 100px; }
         
-        header { text-align: center; margin-bottom: 25px; }
-        header img { max-width: 130px; margin-bottom: 5px; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1)); }
-        .subtitle { color: var(--primary); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+        header { text-align: center; margin-bottom: 20px; }
+        header img { max-width: 130px; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1)); }
         
-        /* Dashboard Placeholder */
-        #dashboard { display: block; }
-        .dash-header { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); }
-        .btn-rutina { width: 100%; padding: 18px; margin-bottom: 15px; font-size: 1rem; font-weight: 600; color: var(--text-main); background-color: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); transition: all 0.2s; }
+        /* Dashboard Central */
+        #dashboard-home { display: block; }
+        .dash-card { background-color: var(--panel-bg); border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .dash-header { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); }
+        
+        .btn-main-action { width: 100%; padding: 16px; background-color: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(90, 46, 184, 0.3); transition: transform 0.2s; }
+        .btn-main-action:active { transform: scale(0.98); }
+
+        #rutinas-selector { display: none; }
+        .btn-rutina { width: 100%; padding: 18px; margin-bottom: 12px; font-size: 1rem; font-weight: 600; color: var(--text-main); background-color: var(--panel-bg); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); transition: all 0.2s; }
         .btn-rutina:active { transform: scale(0.98); border-color: var(--primary); }
+        .btn-back { margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem; cursor: pointer; display: inline-block; font-weight: 600; }
         
         #workout-view { display: none; }
         
-        /* Progress */
         .progress-container { width: 100%; background-color: var(--border); border-radius: 8px; margin-bottom: 25px; overflow: hidden; height: 8px; }
         .progress-bar { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.4s ease; }
         .progress-text { text-align: right; font-size: 0.85rem; color: var(--primary); margin-bottom: 8px; font-weight: 600; }
 
-        /* Exercise Card */
         .exercise-card { background-color: var(--panel-bg); border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; transition: all 0.3s; }
         
         .ex-header { display: flex; justify-content: space-between; align-items: center; padding: 18px; cursor: pointer; background-color: var(--panel-bg); }
@@ -50,7 +56,6 @@
         .ex-body { display: none; border-top: 1px solid var(--border); background-color: #fafafa; }
         .ex-body.open { display: block; }
         
-        /* AF Style Rows */
         .series-header { display: flex; padding: 10px 18px 5px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
         .col-serie { flex: 0 0 60px; }
         .col-valor { flex: 1; padding: 0 5px; }
@@ -58,7 +63,7 @@
         .col-action { flex: 0 0 50px; text-align: right; }
 
         .series-row { display: flex; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--border); transition: background-color 0.3s; }
-        .series-row.completed { background-color: #f0fdf4; } /* Green tint */
+        .series-row.completed { background-color: #f0fdf4; } 
         
         .series-label { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
         .input-compact { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background-color: #fff; color: var(--text-main); font-size: 0.95rem; text-align: center; outline: none; }
@@ -71,18 +76,15 @@
 
         .btn-add-serie { width: 100%; padding: 15px; background: none; border: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; cursor: pointer; border-bottom: 1px solid var(--border); }
         
-        /* Timers */
         .active-timer-display { font-size: 2rem; text-align: center; color: var(--primary); font-weight: 700; margin: 15px 0; display: none; }
         
-        /* Footer */
         .workout-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); }
-        .btn-finish { padding: 14px 20px; background-color: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 600; flex: 1; text-align: center; font-size: 1rem; box-shadow: 0 4px 10px rgba(90, 46, 184, 0.3); }
+        .btn-finish { padding: 14px 20px; background-color: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 600; flex: 1; text-align: center; font-size: 1rem; box-shadow: 0 4px 10px rgba(90, 46, 184, 0.3); cursor: pointer; }
         .btn-finish:active { transform: scale(0.98); }
         
         #global-rest-timer { font-size: 1.2rem; color: var(--text-main); font-weight: 700; margin-right: 20px; display: none; }
         #sync-status { text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; }
 
-        /* Modal */
         #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
         #media-modal img { max-width: 90%; max-height: 80%; border-radius: 12px; }
         .close-modal { position: absolute; top: 25px; right: 25px; color: #fff; font-size: 2.5rem; cursor: pointer; }
@@ -91,14 +93,22 @@
 <body>
 
     <header>
-        <img src="https://i.ibb.co/nTVtbn9/logo-sin-fondo-y-sin-la-frase.png" alt="gIAm Logo">
-        <div class="subtitle">Train Smarter</div>
+        <img src="https://i.ibb.co/SDgmnJjz/e4bf9f94-cf91-4f27-99cb-a3b90e174009-removebg-preview.png" alt="gIAm Logo">
     </header>
 
-    <div id="dashboard">
+    <div id="dashboard-home">
+        <div class="dash-card">
+            <div class="dash-header">Progreso de Carga (kg x reps)</div>
+            <canvas id="progresoChart" width="100" height="60"></canvas>
+        </div>
+        <button class="btn-main-action" onclick="mostrarSelector()">+ Iniciar Entrenamiento</button>
+        <div id="sync-status"></div>
+    </div>
+
+    <div id="rutinas-selector">
+        <div class="btn-back" onclick="volverDashboard()">← Volver al inicio</div>
         <div class="dash-header">Tus Programas</div>
         <div id="rutinas-container">Cargando catálogo...</div>
-        <div id="sync-status"></div>
     </div>
 
     <div id="workout-view">
@@ -121,13 +131,14 @@
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwREc08RbJ65onsF4cWOaVcE6OKAupOk-Cc_KdggnkCxZvhJGncAZNHZGMNh4SIk4C7/exec';
         
-        let datosApp = { rutinas: [], catalogo: [], historial: {} };
+        let datosApp = { rutinas: [], catalogo: [], historial: {}, stats: { fechas: [], volumen: [] } };
         let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
         let rutinaActiva = [];
         let globalRestInterval;
         let activeTimers = {}; 
         let seriesTotalesEntrenamiento = 0;
         let seriesCompletadasEntrenamiento = 0;
+        let chartInstance = null;
 
         function convertirUrlDrive(url) {
             if (!url) return '';
@@ -141,12 +152,59 @@
                 const response = await fetch(APPS_SCRIPT_URL);
                 datosApp = await response.json();
                 localStorage.setItem('giam_datos', JSON.stringify(datosApp));
-                renderizarRutinas();
+                renderizarDashboard();
             } catch (error) {
                 const guardados = localStorage.getItem('giam_datos');
-                if (guardados) { datosApp = JSON.parse(guardados); renderizarRutinas(); } 
-                else { document.getElementById('rutinas-container').innerText = 'Sin conexión y sin datos previos.'; }
+                if (guardados) { 
+                    datosApp = JSON.parse(guardados); 
+                    renderizarDashboard(); 
+                } else { 
+                    document.getElementById('rutinas-container').innerText = 'Sin conexión y sin datos previos.'; 
+                }
             }
+        }
+
+        function renderizarDashboard() {
+            renderizarRutinas();
+            
+            const ctx = document.getElementById('progresoChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: datosApp.stats.fechas || [],
+                    datasets: [{
+                        label: 'Volumen Total',
+                        data: datosApp.stats.volumen || [],
+                        borderColor: '#5a2eb8',
+                        backgroundColor: 'rgba(90, 46, 184, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#10b981',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5] } }
+                    }
+                }
+            });
+        }
+
+        function mostrarSelector() {
+            document.getElementById('dashboard-home').style.display = 'none';
+            document.getElementById('rutinas-selector').style.display = 'block';
+        }
+
+        function volverDashboard() {
+            document.getElementById('rutinas-selector').style.display = 'none';
+            document.getElementById('dashboard-home').style.display = 'block';
         }
 
         function renderizarRutinas() {
@@ -170,7 +228,7 @@
             seriesTotalesEntrenamiento = 0;
             seriesCompletadasEntrenamiento = 0;
             
-            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('rutinas-selector').style.display = 'none';
             document.getElementById('workout-view').style.display = 'block';
             renderizarLista();
             actualizarProgreso();
@@ -225,7 +283,7 @@
         }
 
         function generarHtmlFilaSerie(indexEj, indexSerie, serieNom, valor, peso, unidad) {
-            const numLabel = serieNom.replace(/\D/g, '') || (indexSerie + 1);
+            const numLabel = String(serieNom).replace(/\D/g, '') || (indexSerie + 1);
             return `
                 <div class="series-row" id="row-${indexEj}-${indexSerie}">
                     <div class="col-serie">
@@ -271,7 +329,6 @@
             const row = document.getElementById(`row-${indexEj}-${indexSerie}`);
             const btn = document.getElementById(`btn-play-${indexEj}-${indexSerie}`);
             
-            // Si ya está completada, la desmarcamos (opcional, permite corrección)
             if(row.classList.contains('completed')) {
                 row.classList.remove('completed');
                 btn.innerHTML = '▶';
@@ -291,7 +348,6 @@
 
             if(!valorInp) return alert("Falta el valor (reps/tiempo).");
 
-            // Validar Cronómetro si es tiempo
             if(unidadInp === 'minutos' || unidadInp === 'segundos') {
                 iniciarTimerActivo(indexEj, valorInp, unidadInp);
             }
@@ -304,7 +360,6 @@
             offlineQueue.push(record);
             localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
             
-            // UI Update
             row.classList.add('completed');
             btn.innerHTML = '✔';
             document.getElementById(`valor-${indexEj}-${indexSerie}`).disabled = true;
@@ -359,10 +414,11 @@
         function finalizarRutina() {
             if(!confirm("¿Terminar el entrenamiento y sincronizar?")) return;
             document.getElementById('workout-view').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('dashboard-home').style.display = 'block';
             clearInterval(globalRestInterval);
             document.getElementById('global-rest-timer').style.display = 'none';
             sincronizarDatos();
+            inicializar(); // Refresca el gráfico con los datos recién subidos
         }
 
         function abrirModal(src) { document.getElementById('modal-img').src = src; document.getElementById('media-modal').style.display = 'flex'; }
