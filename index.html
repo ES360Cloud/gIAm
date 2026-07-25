@@ -48,14 +48,22 @@
         .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; transition: width 0.4s ease; border-radius: 10px; }
         .progress-text { text-align: right; font-size: 0.85rem; color: var(--primary); margin-bottom: 8px; font-weight: 700; }
 
-        .exercise-card { background-color: var(--panel-bg); border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; }
-        .ex-header { display: flex; justify-content: space-between; align-items: center; padding: 18px; cursor: pointer; background-color: var(--panel-bg); }
+        .exercise-card { background-color: var(--panel-bg); border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; transition: all 0.3s; }
+        .exercise-card.active-card { border-color: #38bdf8; background-color: #e0f2fe; }
+        .exercise-card.active-card .ex-header { background-color: #e0f2fe; }
+        .exercise-card.active-card .ex-body { background-color: #f0f9ff; }
+        
+        .exercise-card.all-done { border-color: #10b981; background-color: #dcfce7; }
+        .exercise-card.all-done .ex-header { background-color: #dcfce7; }
+        .exercise-card.all-done .ex-body { background-color: #f0fdf4; }
+
+        .ex-header { display: flex; justify-content: space-between; align-items: center; padding: 18px; cursor: pointer; background-color: var(--panel-bg); transition: background-color 0.3s; }
         .ex-title-box { display: flex; flex-direction: column; flex: 1; }
         .ex-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
         .ex-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
         .media-thumbnail { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); margin-left: 15px; display: none; }
         
-        .ex-body { display: none; border-top: 1px solid var(--border); background-color: #f8fafc; }
+        .ex-body { display: none; border-top: 1px solid rgba(0,0,0,0.05); background-color: #f8fafc; transition: background-color 0.3s; }
         .ex-body.open { display: block; }
         
         .series-header { display: flex; padding: 10px 18px 5px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -64,8 +72,7 @@
         .col-peso { flex: 0 0 70px; text-align: center; }
         .col-action { flex: 0 0 50px; text-align: right; }
 
-        .series-row { display: flex; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--border); }
-        .series-row.completed { background-color: #ecfdf5; } 
+        .series-row { display: flex; align-items: center; padding: 10px 18px; border-bottom: 1px solid rgba(0,0,0,0.05); }
         
         .input-compact { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem; text-align: center; outline: none; font-weight: 600; color: var(--text-main); transition: border-color 0.2s; }
         .input-compact:focus { border-color: var(--accent); }
@@ -75,7 +82,7 @@
         .series-row.completed .btn-play { background-color: var(--success); color: #fff; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
         .btn-play:active { transform: scale(0.9); }
 
-        .btn-add-serie { width: 100%; padding: 15px; background: none; border: none; color: var(--primary); font-weight: 700; font-size: 0.95rem; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .btn-add-serie { width: 100%; padding: 15px; background: none; border: none; color: var(--primary); font-weight: 700; font-size: 0.95rem; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .active-timer-display { font-size: 2.2rem; text-align: center; color: var(--primary); font-weight: 700; margin: 15px 0; display: none; }
         
         .workout-footer { position: fixed; bottom: 70px; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 90; }
@@ -90,14 +97,23 @@
         .sheet-close { position: absolute; top: 15px; right: 25px; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; }
         .sheet-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 15px; }
         .sheet-data { font-size: 1rem; margin-bottom: 10px; color: var(--text-main); font-weight: 500; }
-        .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); z-index: 150; display: none; }
+        
+        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(2px); z-index: 150; display: none; }
+        
+        .modal-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; background: var(--panel-bg); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 300; display: none; flex-direction: column; }
+        .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 15px; text-align: center; }
+        .textarea-compact { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem; outline: none; margin-bottom: 15px; resize: none; min-height: 80px; font-family: 'Montserrat', sans-serif; }
 
         .filter-group { display: flex; gap: 10px; margin-bottom: 15px; }
         .filter-btn { width: 100%; padding: 14px; background-color: var(--text-main); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background-color 0.2s; }
         .filter-btn:active { background-color: var(--primary); }
+        .tab-btn { flex: 1; padding: 12px; background-color: var(--text-muted); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background-color: var(--primary); }
 
         #view-dashboard, #view-selector, #view-workout, #view-history { display: none; }
         #view-dashboard { display: block; }
+        #history-charts-view, #history-reports-view { display: none; }
+        #history-charts-view { display: block; }
 
         #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
         #media-modal img { max-width: 90%; max-height: 80%; border-radius: 12px; }
@@ -134,29 +150,40 @@
         <div id="exercise-list"></div>
         <div class="workout-footer">
             <div id="global-rest-timer" style="font-size: 1.4rem; color: var(--text-main); font-weight: 700; margin-right: 20px; display: none;">00:00</div>
-            <div class="btn-finish" onclick="finalizarRutina()">Terminar Rutina</div>
+            <div class="btn-finish" onclick="abrirModalResumen()">Terminar Rutina</div>
         </div>
     </div>
 
     <div id="view-history">
-        <div class="dash-card">
-            <div class="dash-header">Filtros Históricos</div>
-            <div class="filter-group">
-                <select class="input-compact" id="filt-mes">
-                    <option value="Todos">Mes: Todos</option>
-                    <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                    <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                    <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                    <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-                </select>
-                <select class="input-compact" id="filt-rutina">
-                    <option value="Todas">Rutina: Todas</option>
-                </select>
-            </div>
-            <button class="filter-btn" onclick="aplicarFiltro()">Aplicar Filtro</button>
+        <div class="dash-card" style="padding: 15px; display: flex; gap: 10px;">
+            <button class="tab-btn active" id="btn-tab-charts" onclick="switchHistoryTab('charts')">Gráficos</button>
+            <button class="tab-btn" id="btn-tab-reports" onclick="switchHistoryTab('reports')">Reportes IA</button>
         </div>
-        <div class="dash-card">
-            <canvas id="hist-chart" height="220"></canvas>
+
+        <div id="history-charts-view">
+            <div class="dash-card">
+                <div class="dash-header">Filtros Históricos</div>
+                <div class="filter-group">
+                    <select class="input-compact" id="filt-mes">
+                        <option value="Todos">Mes: Todos</option>
+                        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                    </select>
+                    <select class="input-compact" id="filt-rutina">
+                        <option value="Todas">Rutina: Todas</option>
+                    </select>
+                </div>
+                <button class="filter-btn" onclick="aplicarFiltro()">Aplicar Filtro</button>
+            </div>
+            <div class="dash-card">
+                <canvas id="hist-chart" height="220"></canvas>
+            </div>
+        </div>
+
+        <div id="history-reports-view">
+            <div id="reports-container"></div>
         </div>
     </div>
 
@@ -165,13 +192,22 @@
         <div class="nav-item" id="nav-history" onclick="navegarA('history')">Historial</div>
     </div>
 
-    <div class="sheet-overlay" id="sheet-overlay" onclick="cerrarSheet()"></div>
+    <div class="overlay-bg" id="sheet-overlay" onclick="cerrarSheet()"></div>
     <div class="bottom-sheet" id="heatmap-sheet">
         <span class="sheet-close" onclick="cerrarSheet()">&times;</span>
         <div class="sheet-title" id="sheet-title">Fecha</div>
         <div class="sheet-data" id="sheet-rutinas">Rutinas: -</div>
         <div class="sheet-data" id="sheet-series">Series completadas: -</div>
         <div class="sheet-data" id="sheet-volumen">Volumen (kg): -</div>
+    </div>
+
+    <div class="overlay-bg" id="modal-overlay"></div>
+    <div class="modal-box" id="modal-resumen">
+        <div class="modal-title">Resumen de Sesión</div>
+        <input type="text" class="input-compact" id="resumen-tiempo" placeholder="Tiempo total (ej. 45 min)" style="margin-bottom: 15px;">
+        <textarea class="textarea-compact" id="resumen-comentarios" placeholder="¿Cómo te sentiste? ¿Hubo alguna molestia o récord?"></textarea>
+        <button class="btn-main-action" onclick="confirmarFinRutina()" style="margin-bottom: 0;">Guardar y Analizar</button>
+        <button class="btn-main-action btn-cancel" onclick="cerrarModalResumen()" style="margin-top: 10px; margin-bottom:0;">Volver al Entrenamiento</button>
     </div>
 
     <div id="media-modal" onclick="cerrarModal()">
@@ -186,16 +222,9 @@
         Chart.defaults.color = '#64748b';
         Chart.defaults.scale.grid.color = 'rgba(226, 232, 240, 0.5)';
         
-        const customTooltip = {
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-            titleFont: { size: 13, family: "'Montserrat', sans-serif", weight: 'bold' },
-            bodyFont: { size: 12, family: "'Montserrat', sans-serif" },
-            padding: 12,
-            cornerRadius: 8,
-            displayColors: false
-        };
+        const customTooltip = { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 13, family: "'Montserrat', sans-serif", weight: 'bold' }, bodyFont: { size: 12, family: "'Montserrat', sans-serif" }, padding: 12, cornerRadius: 8, displayColors: false };
 
-        let datosApp = { rutinas: [], catalogo: [], historial: {}, heatmap: {}, stats: {} };
+        let datosApp = { rutinas: [], catalogo: [], historial: {}, heatmap: {}, stats: {}, reportes: [] };
         let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
         
         let rutinaActiva = [];
@@ -231,6 +260,7 @@
             renderizarHeatmap();
             renderizarGraficosDashboard();
             llenarFiltros();
+            renderizarReportes();
         }
 
         function navegarA(vista) {
@@ -265,17 +295,28 @@
             }
         }
 
+        function switchHistoryTab(tab) {
+            if(tab === 'charts') {
+                document.getElementById('history-charts-view').style.display = 'block';
+                document.getElementById('history-reports-view').style.display = 'none';
+                document.getElementById('btn-tab-charts').classList.add('active');
+                document.getElementById('btn-tab-reports').classList.remove('active');
+            } else {
+                document.getElementById('history-charts-view').style.display = 'none';
+                document.getElementById('history-reports-view').style.display = 'block';
+                document.getElementById('btn-tab-charts').classList.remove('active');
+                document.getElementById('btn-tab-reports').classList.add('active');
+            }
+        }
+
         function cancelarEntrenamiento() {
             if(!confirm("¿Estás seguro de cancelar? Se perderán las series que hiciste en esta sesión y no se guardarán en tu registro.")) return;
-            
             entrenamientoEnCurso = false;
             clearInterval(globalRestInterval);
             document.getElementById('global-rest-timer').style.display = 'none';
-            
             offlineQueue = [];
             localStorage.setItem('giam_queue', '[]');
             actualizarEstadoRed();
-            
             navegarA('dashboard');
         }
 
@@ -290,10 +331,7 @@
                 const dataDia = datosApp.heatmap[dateKey];
                 const box = document.createElement('div');
                 box.className = `heatmap-box ${dataDia ? 'active' : ''}`;
-                
-                if (dataDia) {
-                    box.onclick = () => abrirSheet(dataDia);
-                }
+                if (dataDia) box.onclick = () => abrirSheet(dataDia);
                 container.appendChild(box);
             }
         }
@@ -329,7 +367,6 @@
                     container.appendChild(card);
 
                     const ctx = document.getElementById(`chart-${rutina}`).getContext('2d');
-                    
                     let gradient = ctx.createLinearGradient(0, 0, 0, 180);
                     gradient.addColorStop(0, 'rgba(0, 229, 255, 0.4)');
                     gradient.addColorStop(1, 'rgba(0, 71, 165, 0.0)');
@@ -338,32 +375,9 @@
                         type: 'line',
                         data: {
                             labels: data.fechas,
-                            datasets: [{ 
-                                label: 'Carga (kg x reps)', 
-                                data: data.volumen, 
-                                borderColor: '#0047a5', 
-                                backgroundColor: gradient, 
-                                borderWidth: 3, 
-                                tension: 0.4, 
-                                fill: true, 
-                                pointBackgroundColor: '#ffffff',
-                                pointBorderColor: '#00e5ff',
-                                pointBorderWidth: 2,
-                                pointRadius: 4,
-                                pointHoverRadius: 6
-                            }]
+                            datasets: [{ label: 'Carga (kg x reps)', data: data.volumen, borderColor: '#0047a5', backgroundColor: gradient, borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: '#ffffff', pointBorderColor: '#00e5ff', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6 }]
                         },
-                        options: { 
-                            responsive: true, 
-                            plugins: { 
-                                legend: { display: false },
-                                tooltip: customTooltip 
-                            }, 
-                            scales: { 
-                                x: { grid: { display: false } }, 
-                                y: { beginAtZero: true, border: {display: false} } 
-                            } 
-                        }
+                        options: { responsive: true, plugins: { legend: { display: false }, tooltip: customTooltip }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, border: {display: false} } } }
                     });
                     chartInstances.push(chart);
                 });
@@ -382,12 +396,7 @@
             const btn = document.querySelector('.filter-btn');
             btn.innerText = 'Consultando datos...';
             
-            const payload = {
-                action: 'filter',
-                mes: document.getElementById('filt-mes').value,
-                rutina: document.getElementById('filt-rutina').value,
-                ejercicio: 'Todos'
-            };
+            const payload = { action: 'filter', mes: document.getElementById('filt-mes').value, rutina: document.getElementById('filt-rutina').value, ejercicio: 'Todos' };
 
             try {
                 const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -395,37 +404,44 @@
                 
                 if (historyChart) historyChart.destroy();
                 const ctx = document.getElementById('hist-chart').getContext('2d');
-                
                 let barGradient = ctx.createLinearGradient(0, 0, 0, 200);
-                barGradient.addColorStop(0, '#00e5ff');
-                barGradient.addColorStop(1, '#0047a5');
+                barGradient.addColorStop(0, '#00e5ff'); barGradient.addColorStop(1, '#0047a5');
 
                 historyChart = new Chart(ctx, {
                     type: 'bar',
-                    data: { 
-                        labels: data.fechas, 
-                        datasets: [{ 
-                            label: 'Carga Total', 
-                            data: data.volumen, 
-                            backgroundColor: barGradient, 
-                            borderRadius: 6,
-                            borderSkipped: false
-                        }] 
-                    },
-                    options: { 
-                        responsive: true, 
-                        plugins: { 
-                            legend: { display: false },
-                            tooltip: customTooltip
-                        },
-                        scales: { 
-                            x: { grid: { display: false } }, 
-                            y: { beginAtZero: true, border: {display: false} } 
-                        }
-                    }
+                    data: { labels: data.fechas, datasets: [{ label: 'Carga Total', data: data.volumen, backgroundColor: barGradient, borderRadius: 6, borderSkipped: false }] },
+                    options: { responsive: true, plugins: { legend: { display: false }, tooltip: customTooltip }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, border: {display: false} } } }
                 });
             } catch(e) {}
             btn.innerText = 'Aplicar Filtro';
+        }
+
+        function renderizarReportes() {
+            const cont = document.getElementById('reports-container');
+            cont.innerHTML = '';
+            if(!datosApp.reportes || datosApp.reportes.length === 0) {
+                cont.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">No hay reportes de IA generados aún. Al terminar una rutina e ingresar tu tiempo y comentarios, aparecerán aquí.</div>';
+                return;
+            }
+            datosApp.reportes.forEach(rep => {
+                const dateStr = new Date(rep.fecha).toLocaleDateString('es-ES');
+                const iaHtml = rep.ia.split('\n').map(p => p.trim() ? `<p style="margin-bottom:10px; font-size:0.9rem; line-height:1.5;">${p}</p>` : '').join('');
+
+                cont.innerHTML += `
+                    <div class="dash-card" style="border-left: 4px solid var(--accent); padding:15px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <span style="font-weight:700; color:var(--primary); font-size:1.1rem;">${rep.rutina}</span>
+                            <span style="font-size:0.8rem; color:var(--text-muted);">${dateStr} | ${rep.tiempo}</span>
+                        </div>
+                        <div style="font-size:0.85rem; font-style:italic; color:var(--text-muted); margin-bottom:15px; border-bottom: 1px solid var(--border); padding-bottom:10px;">
+                            " ${rep.comentarios} "
+                        </div>
+                        <div style="color:var(--text-main);">
+                            ${iaHtml}
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         function renderizarRutinas() {
@@ -458,6 +474,7 @@
 
                 const card = document.createElement('div');
                 card.className = 'exercise-card';
+                card.id = `card-${indexEj}`;
                 
                 let rowsHtml = '';
                 histList.forEach((s, indexSerie) => { rowsHtml += generarHtmlFilaSerie(indexEj, indexSerie, s.serie, s.valor, s.peso, s.unidad); });
@@ -502,13 +519,31 @@
             container.insertAdjacentHTML('beforeend', generarHtmlFilaSerie(indexEj, indexSerie, `Serie ${indexSerie + 1}`, '', '', 'repeticiones'));
             seriesTotales++; actualizarProgreso();
             document.getElementById(`subtitle-${indexEj}`).innerText = `${indexSerie + 1} series marcadas`;
+            verificarEstadoTarjeta(indexEj);
         }
 
         function toggleBody(index) {
             const body = document.getElementById(`body-${index}`);
+            const card = document.getElementById(`card-${index}`);
             const isOpen = body.classList.contains('open');
+            
             document.querySelectorAll('.ex-body').forEach(b => b.classList.remove('open'));
-            if (!isOpen) body.classList.add('open');
+            document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('active-card'));
+            
+            if (!isOpen) {
+                body.classList.add('open');
+                card.classList.add('active-card');
+            }
+        }
+
+        function verificarEstadoTarjeta(indexEj) {
+            const container = document.getElementById(`series-container-${indexEj}`);
+            const total = container.querySelectorAll('.series-row').length;
+            const completadas = container.querySelectorAll('.series-row.completed').length;
+            const card = document.getElementById(`card-${indexEj}`);
+            
+            if(total > 0 && total === completadas) card.classList.add('all-done');
+            else card.classList.remove('all-done');
         }
 
         function ejecutarSerie(indexEj, indexSerie) {
@@ -520,7 +555,7 @@
                 document.getElementById(`valor-${indexEj}-${indexSerie}`).disabled = false;
                 document.getElementById(`peso-${indexEj}-${indexSerie}`).disabled = false;
                 document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = false;
-                seriesCompletadas--; actualizarProgreso(); return;
+                seriesCompletadas--; actualizarProgreso(); verificarEstadoTarjeta(indexEj); return;
             }
 
             const ej = rutinaActiva[indexEj].ejercicio;
@@ -542,6 +577,7 @@
             document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = true;
 
             seriesCompletadas++; actualizarProgreso(); iniciarDescansoGlobal(90); actualizarEstadoRed();
+            verificarEstadoTarjeta(indexEj);
         }
 
         function iniciarTimerActivo(indexEj, valor, unidad) {
@@ -574,14 +610,34 @@
             }, 1000);
         }
 
-        function finalizarRutina() {
-            if(!confirm("¿Terminar y registrar esta sesión en la nube?")) return;
+        function abrirModalResumen() {
+            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById('modal-resumen').style.display = 'flex';
+        }
+        function cerrarModalResumen() {
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('modal-resumen').style.display = 'none';
+        }
+
+        function confirmarFinRutina() {
+            const tiempo = document.getElementById('resumen-tiempo').value;
+            const comentarios = document.getElementById('resumen-comentarios').value;
+            if(!tiempo) return alert("Por favor, ingresa el tiempo total.");
+
+            offlineQueue.push({ type: 'summary', id: Date.now().toString(), fecha: new Date().toLocaleDateString('es-ES'), rutina: rutinaActiva[0].rutina, tiempo: tiempo, comentarios: comentarios });
+            localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
+
+            cerrarModalResumen();
+            document.getElementById('resumen-tiempo').value = '';
+            document.getElementById('resumen-comentarios').value = '';
+
             entrenamientoEnCurso = false;
             navegarA('dashboard');
             clearInterval(globalRestInterval);
             document.getElementById('global-rest-timer').style.display = 'none';
+            
             sincronizarDatos();
-            setTimeout(inicializar, 2000); 
+            setTimeout(inicializar, 4000); 
         }
 
         async function sincronizarDatos() {
@@ -597,14 +653,8 @@
             document.getElementById('sync-status').innerText = navigator.onLine ? `Sincronizado. Pendientes: ${offlineQueue.length}` : `Sin conexión. Cola: ${offlineQueue.length}`;
         }
 
-        function abrirModal(src) {
-            document.getElementById('modal-img').src = src;
-            document.getElementById('media-modal').style.display = 'flex';
-        }
-
-        function cerrarModal() {
-            document.getElementById('media-modal').style.display = 'none';
-        }
+        function abrirModal(src) { document.getElementById('modal-img').src = src; document.getElementById('media-modal').style.display = 'flex'; }
+        function cerrarModal() { document.getElementById('media-modal').style.display = 'none'; }
 
         window.addEventListener('online', sincronizarDatos);
         window.addEventListener('offline', actualizarEstadoRed);
