@@ -3,662 +3,637 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gIAm - Train Smarter</title>
-    <link rel="icon" href="https://i.ibb.co/nTVtbn9/logo-sin-fondo-y-sin-la-frase.png" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>¡Luce Aprende!</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/B5704YPp/asd-1-1.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
-        :root { 
-            --bg-color: #f0f4f8; 
-            --panel-bg: #ffffff; 
-            --primary: #0047a5; 
-            --primary-light: #e6f0fa;
-            --accent: #00e5ff;
-            --success: #10b981;
-            --danger: #ef4444;
-            --text-main: #1e293b; 
-            --text-muted: #64748b; 
-            --border: #e2e8f0;
+        :root {
+            --primary-blue: #4facfe;
+            --secondary-blue: #00f2fe;
+            --primary-pink: #ff758c;
+            --secondary-pink: #ff7eb3;
+            --bg-color: #f3f8ff;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --white: #ffffff;
+            --highlight-bg: #fffbe8;
         }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif !important; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 120px; }
-        
-        header { display: flex; justify-content: center; align-items: center; min-height: 60px; margin-bottom: 20px; }
-        header img { max-width: 120px; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.05)); }
-        
-        .dash-card { background-color: var(--panel-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
-        .dash-header { font-size: 1.05rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .heatmap-box { aspect-ratio: 1; border-radius: 6px; background-color: #e2e8f0; transition: transform 0.2s; cursor: pointer; }
-        .heatmap-box.active { background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: 0 2px 5px rgba(0, 229, 255, 0.3); }
-        .heatmap-box:active { transform: scale(0.9); }
-        
-        .btn-main-action { width: 100%; padding: 18px; background: linear-gradient(90deg, var(--primary), #0056c7); color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 20px rgba(0, 71, 165, 0.25); transition: transform 0.2s; margin-bottom: 10px; }
-        .btn-main-action:active { transform: scale(0.97); }
-        
-        .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: var(--danger) !important; box-shadow: none !important; margin-bottom: 20px; margin-top: 5px; }
-        .btn-cancel:active { background: rgba(239, 68, 68, 0.1) !important; }
 
-        .btn-rutina { width: 100%; padding: 18px; margin-bottom: 12px; font-size: 1.05rem; font-weight: 600; color: var(--text-main); background-color: var(--panel-bg); border: 1px solid var(--border); border-radius: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: border-color 0.2s; }
-        .btn-rutina:active { border-color: var(--primary); }
-        
-        .progress-container { width: 100%; background-color: var(--border); border-radius: 10px; margin-bottom: 25px; overflow: hidden; height: 10px; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; transition: width 0.4s ease; border-radius: 10px; }
-        .progress-text { text-align: right; font-size: 0.85rem; color: var(--primary); margin-bottom: 8px; font-weight: 700; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .exercise-card { background-color: var(--panel-bg); border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; transition: all 0.3s; }
-        .exercise-card.active-card { border-color: #38bdf8; background-color: #e0f2fe; }
-        .exercise-card.active-card .ex-header { background-color: #e0f2fe; }
-        .exercise-card.active-card .ex-body { background-color: #f0f9ff; }
-        
-        .exercise-card.all-done { border-color: #10b981; background-color: #dcfce7; }
-        .exercise-card.all-done .ex-header { background-color: #dcfce7; }
-        .exercise-card.all-done .ex-body { background-color: #f0fdf4; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(79, 172, 254, 0.1), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 117, 140, 0.1), transparent 25%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
 
-        .ex-header { display: flex; justify-content: space-between; align-items: center; padding: 18px; cursor: pointer; background-color: var(--panel-bg); transition: background-color 0.3s; }
-        .ex-title-box { display: flex; flex-direction: column; flex: 1; }
-        .ex-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
-        .ex-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
-        .media-thumbnail { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); margin-left: 15px; display: none; }
-        
-        .ex-body { display: none; border-top: 1px solid rgba(0,0,0,0.05); background-color: #f8fafc; transition: background-color 0.3s; }
-        .ex-body.open { display: block; }
-        
-        .series-header { display: flex; padding: 10px 18px 5px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .col-serie { flex: 0 0 60px; }
-        .col-valor { flex: 1; padding: 0 5px; }
-        .col-peso { flex: 0 0 70px; text-align: center; }
-        .col-action { flex: 0 0 50px; text-align: right; }
+        h1, h2, h3 { font-family: 'Fredoka', sans-serif; text-align: center; }
 
-        .series-row { display: flex; align-items: center; padding: 10px 18px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        
-        .input-compact { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem; text-align: center; outline: none; font-weight: 600; color: var(--text-main); transition: border-color 0.2s; }
-        .input-compact:focus { border-color: var(--accent); }
-        .select-compact { width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 4px; font-weight: 500; color: var(--text-muted); }
-        
-        .btn-play { width: 38px; height: 38px; border-radius: 50%; border: none; background-color: var(--primary-light); color: var(--primary); display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-        .series-row.completed .btn-play { background-color: var(--success); color: #fff; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
-        .btn-play:active { transform: scale(0.9); }
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--white);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            padding: 40px 30px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
 
-        .btn-add-serie { width: 100%; padding: 15px; background: none; border: none; color: var(--primary); font-weight: 700; font-size: 0.95rem; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .active-timer-display { font-size: 2.2rem; text-align: center; color: var(--primary); font-weight: 700; margin: 15px 0; display: none; }
-        
-        .workout-footer { position: fixed; bottom: 70px; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 90; }
-        .btn-finish { padding: 16px 20px; background: linear-gradient(90deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 12px; font-weight: 700; flex: 1; text-align: center; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3); cursor: pointer; text-transform: uppercase; font-size: 0.95rem; }
-        
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--panel-bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--border); z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.03); }
-        .nav-item { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; }
-        .nav-item.active { color: var(--primary); }
+        .app-container::before {
+            content: ''; position: absolute; top: -50px; left: -50px;
+            width: 150px; height: 150px;
+            background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+            border-radius: 50%; opacity: 0.1; z-index: 0;
+        }
+        .app-container::after {
+            content: ''; position: absolute; bottom: -50px; right: -50px;
+            width: 200px; height: 200px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            border-radius: 50%; opacity: 0.1; z-index: 0;
+        }
 
-        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background-color: var(--panel-bg); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px 25px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
-        .bottom-sheet.open { bottom: 0; }
-        .sheet-close { position: absolute; top: 15px; right: 25px; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; }
-        .sheet-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 15px; }
-        .sheet-data { font-size: 1rem; margin-bottom: 10px; color: var(--text-main); font-weight: 500; }
+        .content-wrapper { position: relative; z-index: 1; }
+
+        .header { text-align: center; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; }
+        .header img {
+            width: 100px; height: 100px; border-radius: 25px; margin-bottom: 15px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); object-fit: cover;
+        }
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(to right, var(--primary-blue), var(--primary-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .header p { font-size: 1.2rem; color: var(--text-light); }
+
+        .view { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .view.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .home-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+
+        .menu-btn {
+            background: var(--white); border: 3px solid transparent;
+            border-radius: 25px; padding: 40px 20px; text-align: center;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+        }
+
+        .menu-btn.blue { border-color: rgba(79, 172, 254, 0.3); }
+        .menu-btn.pink { border-color: rgba(255, 117, 140, 0.3); }
+
+        .menu-btn:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .menu-btn.blue:hover {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+            border-color: var(--primary-blue);
+        }
+        .menu-btn.pink:hover {
+            background: linear-gradient(135deg, rgba(255, 117, 140, 0.1), rgba(255, 126, 179, 0.1));
+            border-color: var(--primary-pink);
+        }
+
+        .menu-btn i { font-size: 4rem; }
+        .menu-btn.blue i { color: var(--primary-blue); }
+        .menu-btn.pink i { color: var(--primary-pink); }
+        .menu-btn span {
+            font-family: 'Fredoka', sans-serif; font-size: 1.8rem;
+            font-weight: 600; color: var(--text-main);
+        }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+
+        .btn-back {
+            background: none; border: none; color: var(--text-light);
+            font-size: 1.2rem; font-family: 'Nunito', sans-serif; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.2s;
+        }
+        .btn-back:hover { color: var(--text-main); }
+
+        .badge-level {
+            background: linear-gradient(135deg, #ffd700, #ff8c00); color: white;
+            padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .loading-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10; border-radius: 30px; display: none;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid rgba(79, 172, 254, 0.3);
+            border-radius: 50%; border-top-color: var(--primary-blue);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .card {
+            background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px;
+            padding: 30px; margin-bottom: 25px;
+        }
+
+        .problem-text { font-size: 1.5rem; line-height: 1.6; margin-bottom: 20px; font-weight: 600; text-align: center;}
+
+        .input-group { display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%; }
+
+        .answer-input {
+            width: 100%; max-width: 320px; padding: 15px 20px;
+            font-size: 1.5rem; font-family: 'Nunito', sans-serif; text-align: center;
+            border: 3px solid #cbd5e1; border-radius: 15px; outline: none; transition: border-color 0.3s;
+        }
+        .answer-input:focus { border-color: var(--primary-blue); }
+
+        .numpad {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+            width: 100%; max-width: 320px;
+        }
+        .num-btn {
+            background: white; border: 2px solid #e2e8f0; border-radius: 15px;
+            font-size: 1.8rem; font-family: 'Fredoka', sans-serif; color: var(--primary-blue);
+            padding: 15px 0; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.1s; display: flex; justify-content: center; align-items: center;
+            -webkit-tap-highlight-color: transparent; user-select: none;
+        }
+        .num-btn:active { transform: scale(0.92); background: #f1f5f9; }
+        .num-btn.pink-text { color: var(--primary-pink); font-size: 1.4rem; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white; border: none; padding: 15px 40px; font-size: 1.2rem; width: 100%; max-width: 320px;
+            font-weight: bold; font-family: 'Nunito', sans-serif; border-radius: 25px;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(79, 172, 254, 0.4); }
+        .btn-primary:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; transform: none; }
+
+        .feedback-msg {
+            margin-top: 20px; padding: 15px; border-radius: 15px;
+            text-align: center; font-size: 1.2rem; font-weight: 700; display: none; animation: fadeIn 0.3s;
+        }
+        .feedback-msg.success { background-color: #dcfce7; color: #166534; border: 2px solid #86efac; display: block; }
+        .feedback-msg.error { background-color: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; display: block; }
+
+        .dictation-controls { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 30px; }
         
-        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(2px); z-index: 150; display: none; }
-        
-        .modal-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; background: var(--panel-bg); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 300; display: none; flex-direction: column; }
-        .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 15px; text-align: center; }
-        .textarea-compact { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem; outline: none; margin-bottom: 15px; resize: none; min-height: 80px; font-family: 'Montserrat', sans-serif; }
+        .play-row { display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap; }
 
-        .filter-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .filter-btn { width: 100%; padding: 14px; background-color: var(--text-main); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background-color 0.2s; }
-        .filter-btn:active { background-color: var(--primary); }
-        .tab-btn { flex: 1; padding: 12px; background-color: var(--text-muted); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .tab-btn.active { background-color: var(--primary); }
+        .btn-play {
+            background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));
+            color: white; border: none; width: 80px; height: 80px; border-radius: 50%;
+            font-size: 2rem; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 117, 140, 0.3);
+            transition: all 0.3s; display: flex; justify-content: center; align-items: center;
+        }
+        .btn-play:hover { transform: scale(1.05); box-shadow: 0 15px 30px rgba(255, 117, 140, 0.4); }
+        .btn-play.playing { animation: pulse 1.5s infinite; }
 
-        #view-dashboard, #view-selector, #view-workout, #view-history { display: none; }
-        #view-dashboard { display: block; }
-        #history-charts-view, #history-reports-view { display: none; }
-        #history-charts-view { display: block; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 117, 140, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 117, 140, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 117, 140, 0); }
+        }
 
-        #media-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        #media-modal img { max-width: 90%; max-height: 80%; border-radius: 12px; }
-        .close-modal { position: absolute; top: 25px; right: 25px; color: #fff; font-size: 2.5rem; cursor: pointer; }
+        .speed-control { display: flex; align-items: center; gap: 15px; background: #f1f5f9; padding: 10px 20px; border-radius: 20px; }
+        .speed-control label { font-weight: 700; color: var(--text-light); }
+        input[type=range] { -webkit-appearance: none; width: 150px; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: var(--primary-pink); cursor: pointer; margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #cbd5e1; border-radius: 2px; }
+
+        .text-display {
+            background: white; border: 2px dashed #cbd5e1; border-radius: 20px;
+            padding: 30px; font-size: 1.6rem; line-height: 1.8; color: var(--text-main);
+            min-height: 200px; text-align: center;
+        }
+
+        .sentence { transition: all 0.3s; padding: 2px 5px; border-radius: 5px; }
+        .sentence.highlight {
+            background-color: var(--highlight-bg); color: #000; font-weight: 700;
+            border-bottom: 3px solid var(--primary-pink);
+        }
+
+        .btn-next-dictation {
+            background: white; border: 2px solid var(--primary-pink); color: var(--primary-pink);
+            padding: 12px 30px; font-size: 1.1rem; font-weight: bold; border-radius: 25px;
+            cursor: pointer; margin-top: 20px; transition: all 0.2s; width: 100%;
+        }
+        .btn-next-dictation:hover { background: var(--primary-pink); color: white; }
+
+        @media (max-width: 600px) {
+            .home-menu { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2.2rem; }
+            .problem-text { font-size: 1.2rem; }
+            .text-display { font-size: 1.3rem; padding: 20px; }
+            .speed-control { flex-direction: column; gap: 5px; }
+        }
     </style>
 </head>
 <body>
-
-    <header>
-        <img src="https://i.ibb.co/nTVtbn9/logo-sin-fondo-y-sin-la-frase.png" alt="gIAm Logo">
-    </header>
-
-    <div id="view-dashboard">
-        <button class="btn-main-action" id="btn-start-workout" onclick="navegarA('selector')">+ Iniciar Sesión</button>
-        <button class="btn-main-action btn-cancel" id="btn-cancel-workout" onclick="cancelarEntrenamiento()" style="display:none;">✖ Cancelar Sesión</button>
-        <div id="sync-status" style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-bottom: 20px; font-weight: 600;"></div>
-        
-        <div class="dash-card">
-            <div class="dash-header">Asistencia (Últimos 28 días)</div>
-            <div class="heatmap-grid" id="heatmap-container"></div>
-        </div>
-        <div id="charts-container"></div>
-    </div>
-
-    <div id="view-selector">
-        <div class="dash-header" style="color:var(--text-muted); cursor:pointer; margin-bottom:20px; font-size: 0.9rem;" onclick="navegarA('dashboard')">← VOLVER</div>
-        <div class="dash-header">Selecciona tu Programa</div>
-        <div id="rutinas-container">Cargando catálogo...</div>
-    </div>
-
-    <div id="view-workout">
-        <div class="progress-text"><span id="progress-text-val">0</span>% Entrenamiento</div>
-        <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
-        <div id="exercise-list"></div>
-        <div class="workout-footer">
-            <div id="global-rest-timer" style="font-size: 1.4rem; color: var(--text-main); font-weight: 700; margin-right: 20px; display: none;">00:00</div>
-            <div class="btn-finish" onclick="abrirModalResumen()">Terminar Rutina</div>
-        </div>
-    </div>
-
-    <div id="view-history">
-        <div class="dash-card" style="padding: 15px; display: flex; gap: 10px;">
-            <button class="tab-btn active" id="btn-tab-charts" onclick="switchHistoryTab('charts')">Gráficos</button>
-            <button class="tab-btn" id="btn-tab-reports" onclick="switchHistoryTab('reports')">Reportes IA</button>
+    <div class="app-container">
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <h3 style="margin-top: 20px; color: var(--primary-blue);">Un ratito Luchi...</h3>
         </div>
 
-        <div id="history-charts-view">
-            <div class="dash-card">
-                <div class="dash-header">Filtros Históricos</div>
-                <div class="filter-group">
-                    <select class="input-compact" id="filt-mes">
-                        <option value="Todos">Mes: Todos</option>
-                        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-                    </select>
-                    <select class="input-compact" id="filt-rutina">
-                        <option value="Todas">Rutina: Todas</option>
-                    </select>
+        <div class="content-wrapper">
+            <div class="header">
+                <img src="https://i.ibb.co/B5704YPp/asd-1-1.png" alt="Luce Logo">
+                <h1>¡Hola Luchi! 🌟</h1>
+                <p>¿Qué aventura vamos a elegir hoy?</p>
+            </div>
+
+            <div id="view-home" class="view active">
+                <div class="home-menu">
+                    <button class="menu-btn blue" onclick="startMath()">
+                        <i class="fa-solid fa-calculator"></i>
+                        <span>Problemas<br>Matemáticos</span>
+                    </button>
+                    <button class="menu-btn pink" onclick="startDictation()">
+                        <i class="fa-solid fa-pencil"></i>
+                        <span>Dictados<br>Divertidos</span>
+                    </button>
                 </div>
-                <button class="filter-btn" onclick="aplicarFiltro()">Aplicar Filtro</button>
             </div>
-            <div class="dash-card">
-                <canvas id="hist-chart" height="220"></canvas>
+
+            <div id="view-math" class="view">
+                <div class="top-bar">
+                    <button class="btn-back" onclick="goHome()">
+                        <i class="fa-solid fa-arrow-left"></i> Volver
+                    </button>
+                    <div class="badge-level" id="math-level-badge">Nivel: 1</div>
+                </div>
+
+                <div class="card">
+                    <div class="problem-text" id="math-question"></div>
+                    <div class="input-group" id="math-input-group">
+                        <input type="text" id="math-answer" class="answer-input" placeholder="Toca aquí para escribir letras..." autocomplete="off">
+                        
+                        <div class="numpad" id="math-numpad">
+                            <button class="num-btn" onclick="typeNum('1')">1</button>
+                            <button class="num-btn" onclick="typeNum('2')">2</button>
+                            <button class="num-btn" onclick="typeNum('3')">3</button>
+                            <button class="num-btn" onclick="typeNum('4')">4</button>
+                            <button class="num-btn" onclick="typeNum('5')">5</button>
+                            <button class="num-btn" onclick="typeNum('6')">6</button>
+                            <button class="num-btn" onclick="typeNum('7')">7</button>
+                            <button class="num-btn" onclick="typeNum('8')">8</button>
+                            <button class="num-btn" onclick="typeNum('9')">9</button>
+                            <button class="num-btn pink-text" onclick="typeNum(' ')"><i class="fa-solid fa-minus"></i></button>
+                            <button class="num-btn" onclick="typeNum('0')">0</button>
+                            <button class="num-btn pink-text" onclick="deleteNum()"><i class="fa-solid fa-delete-left"></i></button>
+                        </div>
+
+                        <button class="btn-primary" id="btn-check-math" onclick="checkMathAnswer()">
+                            <i class="fa-solid fa-check"></i> ¡Comprobar!
+                        </button>
+                    </div>
+                    <div id="math-feedback" class="feedback-msg"></div>
+                </div>
+                
+                <button id="btn-next-math" class="btn-primary" style="width: 100%; display: none; background: linear-gradient(135deg, #10b981, #059669);" onclick="loadNextMath()">
+                    Siguiente Problema <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div id="view-dictation" class="view">
+                <div class="top-bar">
+                    <button class="btn-back" onclick="goHome()">
+                        <i class="fa-solid fa-arrow-left"></i> Volver
+                    </button>
+                    <div class="badge-level" style="background: linear-gradient(135deg, var(--primary-pink), var(--secondary-pink));">
+                        ¡A escribir! 📝
+                    </div>
+                </div>
+
+                <div class="dictation-controls">
+                    <div class="play-row">
+                        <button class="btn-play" id="btn-play-dictation" onclick="playCurrentSentence()">
+                            <i class="fa-solid fa-play" id="play-icon"></i>
+                        </button>
+                        <button class="btn-primary" id="btn-next-sentence" onclick="nextSentence()" style="display: none; max-width: 250px;">
+                            Siguiente Oración <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="speed-control">
+                        <label for="speech-speed"><i class="fa-solid fa-gauge"></i> Velocidad:</label>
+                        <input type="range" id="speech-speed" min="0.2" max="1" step="0.1" value="0.5">
+                        <span id="speed-value" style="font-weight:bold; color:var(--primary-pink);">Lenta</span>
+                    </div>
+                </div>
+
+                <div class="text-display" id="dictation-text"></div>
+
+                <button class="btn-next-dictation" id="btn-load-next-dict" onclick="loadNextDictation()">
+                    <i class="fa-solid fa-forward-step"></i> Cargar otro dictado
+                </button>
             </div>
         </div>
-
-        <div id="history-reports-view">
-            <div id="reports-container"></div>
-        </div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item active" id="nav-dashboard" onclick="navegarA('dashboard')">Inicio</div>
-        <div class="nav-item" id="nav-history" onclick="navegarA('history')">Historial</div>
-    </div>
-
-    <div class="overlay-bg" id="sheet-overlay" onclick="cerrarSheet()"></div>
-    <div class="bottom-sheet" id="heatmap-sheet">
-        <span class="sheet-close" onclick="cerrarSheet()">&times;</span>
-        <div class="sheet-title" id="sheet-title">Fecha</div>
-        <div class="sheet-data" id="sheet-rutinas">Rutinas: -</div>
-        <div class="sheet-data" id="sheet-series">Series completadas: -</div>
-        <div class="sheet-data" id="sheet-volumen">Volumen (kg): -</div>
-    </div>
-
-    <div class="overlay-bg" id="modal-overlay"></div>
-    <div class="modal-box" id="modal-resumen">
-        <div class="modal-title">Resumen de Sesión</div>
-        <input type="text" class="input-compact" id="resumen-tiempo" placeholder="Tiempo total (ej. 45 min)" style="margin-bottom: 15px;">
-        <textarea class="textarea-compact" id="resumen-comentarios" placeholder="¿Cómo te sentiste? ¿Hubo alguna molestia o récord?"></textarea>
-        <button class="btn-main-action" onclick="confirmarFinRutina()" style="margin-bottom: 0;">Guardar y Analizar</button>
-        <button class="btn-main-action btn-cancel" onclick="cerrarModalResumen()" style="margin-top: 10px; margin-bottom:0;">Volver al Entrenamiento</button>
-    </div>
-
-    <div id="media-modal" onclick="cerrarModal()">
-        <span class="close-modal">&times;</span>
-        <img id="modal-img" src="" alt="Vista ampliada">
     </div>
 
     <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfsmj4R7Fkqiesr6XMon5puBSeAk1QnK94e-VZStQfxkRl2rxlEyoYRzl6JpYSsk8z/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwoclGcBVqQdOZBKsjgB07ErrN-D9mCw28-POadcWHwKiReOCVRPvcbWVcq-Xxdxlcz/exec'; 
         
-        Chart.defaults.font.family = "'Montserrat', sans-serif";
-        Chart.defaults.color = '#64748b';
-        Chart.defaults.scale.grid.color = 'rgba(226, 232, 240, 0.5)';
+        let currentMathProblem = null;
+        let consecutiveMathWins = 0;
+        let currentDifficultyLevel = 1;
         
-        const customTooltip = { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 13, family: "'Montserrat', sans-serif", weight: 'bold' }, bodyFont: { size: 12, family: "'Montserrat', sans-serif" }, padding: 12, cornerRadius: 8, displayColors: false };
+        let currentDictationId = null;
+        let currentDictationText = "";
+        let dictationSentences = [];
+        let currentSentenceIndex = 0;
+        let speechSynthesis = window.speechSynthesis;
+        let speechUtterance = null;
 
-        let datosApp = { rutinas: [], catalogo: [], historial: {}, heatmap: {}, stats: {}, reportes: [] };
-        let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
+        const successMessages = [
+            "¡Excelente Luchi! Eres una genia. 🌟",
+            "¡Perfecto! Lo hiciste increíble Luz. 🎉",
+            "¡Wow! Qué rápida y precisa. ¡Sigue así! 🚀",
+            "¡Correctísimo! Choca esos cinco ✋"
+        ];
         
-        let rutinaActiva = [];
-        let entrenamientoEnCurso = false;
-        let globalRestInterval;
-        let activeTimers = {}; 
-        let seriesTotales = 0;
-        let seriesCompletadas = 0;
-        let chartInstances = [];
-        let historyChart;
+        const errorMessages = [
+            "¡Casi casi Luchi! Revisalo con papá y seguimos. 💪",
+            "Ups, no pasa nada Luz. De los errores se aprende. ¡Vamos al próximo! 🌈",
+            "Mmm, parece que no es eso. ¡Hagamos otro, tú puedes! ✨",
+            "Tranquila Luchi, velo con tu papá y a la próxima sale seguro. 😉"
+        ];
 
-        function convertirUrlDrive(url) {
-            if (!url) return '';
-            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            return match ? 'https://drive.google.com/uc?id=' + match[1] : url;
+        async function fetchApi(action, params = {}) {
+            params.action = action;
+            const options = {
+                method: 'POST',
+                body: JSON.stringify(params)
+            };
+            const response = await fetch(SCRIPT_URL, options);
+            return await response.json();
         }
 
-        async function inicializar() {
-            actualizarEstadoRed();
+        function typeNum(char) {
+            const input = document.getElementById('math-answer');
+            input.value += char;
+        }
+
+        function deleteNum() {
+            const input = document.getElementById('math-answer');
+            input.value = input.value.slice(0, -1);
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            if (viewId !== 'view-dictation') stopDictation();
+        }
+
+        function goHome() {
+            showView('view-home');
+            document.querySelector('.header p').innerText = "¿Qué aventura vamos a elegir hoy?";
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+
+        function getRandomMessage(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function startMath() {
+            showView('view-math');
+            document.querySelector('.header p').innerText = "¡A pensar fuerte, Luchi!";
+            document.getElementById('math-input-group').style.display = 'flex';
+            document.getElementById('math-answer').disabled = false;
+            loadNextMath();
+        }
+
+        async function loadNextMath() {
+            showLoading(true);
+            document.getElementById('math-answer').value = '';
+            document.getElementById('math-input-group').style.display = 'flex';
+            document.getElementById('math-answer').disabled = false;
+            document.getElementById('btn-next-math').style.display = 'none';
+            document.getElementById('math-feedback').className = 'feedback-msg';
+            document.getElementById('math-level-badge').innerText = `Nivel: ${currentDifficultyLevel}`;
+
             try {
-                const response = await fetch(APPS_SCRIPT_URL);
-                datosApp = await response.json();
-                localStorage.setItem('giam_datos', JSON.stringify(datosApp));
-                renderizarTodo();
+                const problem = await fetchApi('getMath', { level: currentDifficultyLevel });
+                onMathProblemLoaded(problem && problem.rowId ? problem : null);
             } catch (error) {
-                const guardados = localStorage.getItem('giam_datos');
-                if (guardados) { datosApp = JSON.parse(guardados); renderizarTodo(); } 
+                onServerError(error);
             }
         }
 
-        function renderizarTodo() {
-            renderizarRutinas();
-            renderizarHeatmap();
-            renderizarGraficosDashboard();
-            llenarFiltros();
-            renderizarReportes();
-        }
-
-        function navegarA(vista) {
-            document.getElementById('view-dashboard').style.display = 'none';
-            document.getElementById('view-selector').style.display = 'none';
-            document.getElementById('view-workout').style.display = 'none';
-            document.getElementById('view-history').style.display = 'none';
-            
-            document.getElementById('nav-dashboard').classList.remove('active');
-            document.getElementById('nav-history').classList.remove('active');
-
-            if (vista === 'dashboard') {
-                if(entrenamientoEnCurso) {
-                    document.getElementById('btn-start-workout').innerText = '▶ Retomar Entrenamiento';
-                    document.getElementById('btn-start-workout').onclick = () => navegarA('workout');
-                    document.getElementById('btn-cancel-workout').style.display = 'block';
-                } else {
-                    document.getElementById('btn-start-workout').innerText = '+ Iniciar Sesión';
-                    document.getElementById('btn-start-workout').onclick = () => navegarA('selector');
-                    document.getElementById('btn-cancel-workout').style.display = 'none';
-                }
-                document.getElementById('view-dashboard').style.display = 'block';
-                document.getElementById('nav-dashboard').classList.add('active');
-            } else if (vista === 'selector') {
-                document.getElementById('view-selector').style.display = 'block';
-            } else if (vista === 'workout') {
-                document.getElementById('view-workout').style.display = 'block';
-            } else if (vista === 'history') {
-                document.getElementById('view-history').style.display = 'block';
-                document.getElementById('nav-history').classList.add('active');
-                if(!historyChart) aplicarFiltro();
-            }
-        }
-
-        function switchHistoryTab(tab) {
-            if(tab === 'charts') {
-                document.getElementById('history-charts-view').style.display = 'block';
-                document.getElementById('history-reports-view').style.display = 'none';
-                document.getElementById('btn-tab-charts').classList.add('active');
-                document.getElementById('btn-tab-reports').classList.remove('active');
-            } else {
-                document.getElementById('history-charts-view').style.display = 'none';
-                document.getElementById('history-reports-view').style.display = 'block';
-                document.getElementById('btn-tab-charts').classList.remove('active');
-                document.getElementById('btn-tab-reports').classList.add('active');
-            }
-        }
-
-        function cancelarEntrenamiento() {
-            if(!confirm("¿Estás seguro de cancelar? Se perderán las series que hiciste en esta sesión y no se guardarán en tu registro.")) return;
-            entrenamientoEnCurso = false;
-            clearInterval(globalRestInterval);
-            document.getElementById('global-rest-timer').style.display = 'none';
-            offlineQueue = [];
-            localStorage.setItem('giam_queue', '[]');
-            actualizarEstadoRed();
-            navegarA('dashboard');
-        }
-
-        function renderizarHeatmap() {
-            const container = document.getElementById('heatmap-container');
-            container.innerHTML = '';
-            for (let i = 27; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const dateKey = d.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
-                
-                const dataDia = datosApp.heatmap[dateKey];
-                const box = document.createElement('div');
-                box.className = `heatmap-box ${dataDia ? 'active' : ''}`;
-                if (dataDia) box.onclick = () => abrirSheet(dataDia);
-                container.appendChild(box);
-            }
-        }
-
-        function abrirSheet(data) {
-            document.getElementById('sheet-title').innerText = data.fechaStr;
-            document.getElementById('sheet-rutinas').innerHTML = `<strong>Rutinas:</strong> ${data.rutinas.join(', ')}`;
-            document.getElementById('sheet-series').innerHTML = `<strong>Series completadas:</strong> ${data.series}`;
-            document.getElementById('sheet-volumen').innerHTML = `<strong>Volumen Total:</strong> ${data.volumen.toLocaleString()} kg`;
-            document.getElementById('heatmap-sheet').classList.add('open');
-            document.getElementById('sheet-overlay').style.display = 'block';
-        }
-
-        function cerrarSheet() {
-            document.getElementById('heatmap-sheet').classList.remove('open');
-            document.getElementById('sheet-overlay').style.display = 'none';
-        }
-
-        function renderizarGraficosDashboard() {
-            const container = document.getElementById('charts-container');
-            container.innerHTML = '';
-            chartInstances.forEach(c => c.destroy());
-            chartInstances = [];
-
-            if(datosApp.stats) {
-                Object.keys(datosApp.stats).forEach(rutina => {
-                    const data = datosApp.stats[rutina];
-                    if (data.fechas.length === 0) return;
-                    
-                    const card = document.createElement('div');
-                    card.className = 'dash-card';
-                    card.innerHTML = `<div class="dash-header">Volumen: ${rutina}</div><canvas id="chart-${rutina}" height="180"></canvas>`;
-                    container.appendChild(card);
-
-                    const ctx = document.getElementById(`chart-${rutina}`).getContext('2d');
-                    let gradient = ctx.createLinearGradient(0, 0, 0, 180);
-                    gradient.addColorStop(0, 'rgba(0, 229, 255, 0.4)');
-                    gradient.addColorStop(1, 'rgba(0, 71, 165, 0.0)');
-
-                    const chart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: data.fechas,
-                            datasets: [{ label: 'Carga (kg x reps)', data: data.volumen, borderColor: '#0047a5', backgroundColor: gradient, borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: '#ffffff', pointBorderColor: '#00e5ff', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6 }]
-                        },
-                        options: { responsive: true, plugins: { legend: { display: false }, tooltip: customTooltip }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, border: {display: false} } } }
-                    });
-                    chartInstances.push(chart);
-                });
-            }
-        }
-
-        function llenarFiltros() {
-            const selectRut = document.getElementById('filt-rutina');
-            selectRut.innerHTML = '<option value="Todas">Rutina: Todas</option>';
-            datosApp.rutinas.forEach(r => { selectRut.innerHTML += `<option value="${r}">${r}</option>`; });
-            selectRut.innerHTML += `<option value="Libre">Libre</option>`;
-        }
-
-        async function aplicarFiltro() {
-            if(!navigator.onLine) return alert("Necesitas conexión para consultar el histórico en la nube.");
-            const btn = document.querySelector('.filter-btn');
-            btn.innerText = 'Consultando datos...';
-            
-            const payload = { action: 'filter', mes: document.getElementById('filt-mes').value, rutina: document.getElementById('filt-rutina').value, ejercicio: 'Todos' };
-
-            try {
-                const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const data = await res.json();
-                
-                if (historyChart) historyChart.destroy();
-                const ctx = document.getElementById('hist-chart').getContext('2d');
-                let barGradient = ctx.createLinearGradient(0, 0, 0, 200);
-                barGradient.addColorStop(0, '#00e5ff'); barGradient.addColorStop(1, '#0047a5');
-
-                historyChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: { labels: data.fechas, datasets: [{ label: 'Carga Total', data: data.volumen, backgroundColor: barGradient, borderRadius: 6, borderSkipped: false }] },
-                    options: { responsive: true, plugins: { legend: { display: false }, tooltip: customTooltip }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, border: {display: false} } } }
-                });
-            } catch(e) {}
-            btn.innerText = 'Aplicar Filtro';
-        }
-
-        function renderizarReportes() {
-            const cont = document.getElementById('reports-container');
-            cont.innerHTML = '';
-            if(!datosApp.reportes || datosApp.reportes.length === 0) {
-                cont.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">No hay reportes de IA generados aún. Al terminar una rutina e ingresar tu tiempo y comentarios, aparecerán aquí.</div>';
+        function onMathProblemLoaded(problem) {
+            showLoading(false);
+            if (!problem) {
+                document.getElementById('math-question').innerText = "¡Felicitaciones! 🎉 Los has resuelto todos. Ve con tu papá a pedirle más ejercicios.";
+                document.getElementById('math-input-group').style.display = 'none';
+                triggerConfetti();
                 return;
             }
-            datosApp.reportes.forEach(rep => {
-                const dateStr = new Date(rep.fecha).toLocaleDateString('es-ES');
-                const iaHtml = rep.ia.split('\n').map(p => p.trim() ? `<p style="margin-bottom:10px; font-size:0.9rem; line-height:1.5;">${p}</p>` : '').join('');
-
-                cont.innerHTML += `
-                    <div class="dash-card" style="border-left: 4px solid var(--accent); padding:15px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                            <span style="font-weight:700; color:var(--primary); font-size:1.1rem;">${rep.rutina}</span>
-                            <span style="font-size:0.8rem; color:var(--text-muted);">${dateStr} | ${rep.tiempo}</span>
-                        </div>
-                        <div style="font-size:0.85rem; font-style:italic; color:var(--text-muted); margin-bottom:15px; border-bottom: 1px solid var(--border); padding-bottom:10px;">
-                            " ${rep.comentarios} "
-                        </div>
-                        <div style="color:var(--text-main);">
-                            ${iaHtml}
-                        </div>
-                    </div>
-                `;
-            });
+            currentMathProblem = problem;
+            document.getElementById('math-question').innerText = problem.enunciado;
         }
 
-        function renderizarRutinas() {
-            const container = document.getElementById('rutinas-container');
-            container.innerHTML = '';
-            datosApp.rutinas.forEach(rutina => {
-                const btn = document.createElement('div');
-                btn.className = 'btn-rutina'; btn.innerHTML = `<span>${rutina}</span> <span style="color:var(--primary); font-weight:700;">➔</span>`;
-                btn.onclick = () => iniciarRutina(rutina);
-                container.appendChild(btn);
-            });
-        }
+        async function checkMathAnswer() {
+            const userAnswer = document.getElementById('math-answer').value.trim();
+            if (!userAnswer) return;
 
-        function iniciarRutina(nombreRutina) {
-            rutinaActiva = datosApp.catalogo.filter(item => item.rutina === nombreRutina).sort((a, b) => a.orden - b.orden);
-            if (rutinaActiva.length === 0) return alert("Rutina sin ejercicios.");
-            seriesTotales = 0; seriesCompletadas = 0; entrenamientoEnCurso = true;
-            navegarA('workout');
-            renderizarListaEntrenamiento();
-            actualizarProgreso();
-        }
+            showLoading(true);
+            document.getElementById('math-input-group').style.display = 'none';
 
-        function renderizarListaEntrenamiento() {
-            const list = document.getElementById('exercise-list');
-            list.innerHTML = '';
-            
-            rutinaActiva.forEach((ej, indexEj) => {
-                const histList = datosApp.historial[ej.ejercicio] || [{ serie: '1', valor: '', peso: '', unidad: 'repeticiones' }];
-                seriesTotales += histList.length;
-
-                const card = document.createElement('div');
-                card.className = 'exercise-card';
-                card.id = `card-${indexEj}`;
-                
-                let rowsHtml = '';
-                histList.forEach((s, indexSerie) => { rowsHtml += generarHtmlFilaSerie(indexEj, indexSerie, s.serie, s.valor, s.peso, s.unidad); });
-
-                const imgUrl = convertirUrlDrive(ej.media);
-
-                card.innerHTML = `
-                    <div class="ex-header" onclick="toggleBody(${indexEj})">
-                        <div class="ex-title-box">
-                            <span class="ex-title">${ej.ejercicio}</span>
-                            <span class="ex-subtitle" id="subtitle-${indexEj}">${histList.length} series marcadas</span>
-                        </div>
-                        <img src="${imgUrl}" class="media-thumbnail" style="${imgUrl ? 'display:block;' : 'display:none;'}" onclick="event.stopPropagation(); abrirModal('${imgUrl}')">
-                    </div>
-                    <div class="ex-body" id="body-${indexEj}">
-                        <div id="display-timer-${indexEj}" class="active-timer-display">00:00</div>
-                        <div class="series-header"><div class="col-serie">Serie</div><div class="col-valor">Objetivo</div><div class="col-peso">kg</div><div class="col-action"></div></div>
-                        <div id="series-container-${indexEj}">${rowsHtml}</div>
-                        <button class="btn-add-serie" onclick="agregarFilaSerie(${indexEj})">+ Añadir serie nueva</button>
-                    </div>
-                `;
-                list.appendChild(card);
-            });
-            if(rutinaActiva.length > 0) toggleBody(0);
-        }
-
-        function generarHtmlFilaSerie(indexEj, indexSerie, serieNom, valor, peso, unidad) {
-            const numLabel = String(serieNom).replace(/\D/g, '') || (indexSerie + 1);
-            return `
-                <div class="series-row" id="row-${indexEj}-${indexSerie}">
-                    <div class="col-serie"><div style="font-weight:700; color:var(--text-main);">${numLabel}</div><input type="hidden" id="serieNom-${indexEj}-${indexSerie}" value="Serie ${numLabel}"></div>
-                    <div class="col-valor"><input type="number" class="input-compact" id="valor-${indexEj}-${indexSerie}" value="${valor}"><select class="select-compact" id="unidad-${indexEj}-${indexSerie}"><option value="repeticiones" ${unidad === 'repeticiones' ? 'selected' : ''}>Reps</option><option value="minutos" ${unidad === 'minutos' ? 'selected' : ''}>Min</option><option value="segundos" ${unidad === 'segundos' ? 'selected' : ''}>Seg</option></select></div>
-                    <div class="col-peso"><input type="text" class="input-compact" id="peso-${indexEj}-${indexSerie}" value="${peso}"></div>
-                    <div class="col-action"><button class="btn-play" id="btn-play-${indexEj}-${indexSerie}" onclick="ejecutarSerie(${indexEj}, ${indexSerie})">▶</button></div>
-                </div>
-            `;
-        }
-
-        function agregarFilaSerie(indexEj) {
-            const container = document.getElementById(`series-container-${indexEj}`);
-            const indexSerie = container.children.length;
-            container.insertAdjacentHTML('beforeend', generarHtmlFilaSerie(indexEj, indexSerie, `Serie ${indexSerie + 1}`, '', '', 'repeticiones'));
-            seriesTotales++; actualizarProgreso();
-            document.getElementById(`subtitle-${indexEj}`).innerText = `${indexSerie + 1} series marcadas`;
-            verificarEstadoTarjeta(indexEj);
-        }
-
-        function toggleBody(index) {
-            const body = document.getElementById(`body-${index}`);
-            const card = document.getElementById(`card-${index}`);
-            const isOpen = body.classList.contains('open');
-            
-            document.querySelectorAll('.ex-body').forEach(b => b.classList.remove('open'));
-            document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('active-card'));
-            
-            if (!isOpen) {
-                body.classList.add('open');
-                card.classList.add('active-card');
-            }
-        }
-
-        function verificarEstadoTarjeta(indexEj) {
-            const container = document.getElementById(`series-container-${indexEj}`);
-            const total = container.querySelectorAll('.series-row').length;
-            const completadas = container.querySelectorAll('.series-row.completed').length;
-            const card = document.getElementById(`card-${indexEj}`);
-            
-            if(total > 0 && total === completadas) card.classList.add('all-done');
-            else card.classList.remove('all-done');
-        }
-
-        function ejecutarSerie(indexEj, indexSerie) {
-            const row = document.getElementById(`row-${indexEj}-${indexSerie}`);
-            const btn = document.getElementById(`btn-play-${indexEj}-${indexSerie}`);
-            
-            if(row.classList.contains('completed')) {
-                row.classList.remove('completed'); btn.innerHTML = '▶';
-                document.getElementById(`valor-${indexEj}-${indexSerie}`).disabled = false;
-                document.getElementById(`peso-${indexEj}-${indexSerie}`).disabled = false;
-                document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = false;
-                seriesCompletadas--; actualizarProgreso(); verificarEstadoTarjeta(indexEj); return;
-            }
-
-            const ej = rutinaActiva[indexEj].ejercicio;
-            const serieVal = document.getElementById(`serieNom-${indexEj}-${indexSerie}`).value;
-            const valorInp = document.getElementById(`valor-${indexEj}-${indexSerie}`).value;
-            const unidadInp = document.getElementById(`unidad-${indexEj}-${indexSerie}`).value;
-            const pesoInp = document.getElementById(`peso-${indexEj}-${indexSerie}`).value;
-
-            if(!valorInp) return alert("Carga un valor antes de ejecutar.");
-
-            if(unidadInp === 'minutos' || unidadInp === 'segundos') iniciarTimerActivo(indexEj, valorInp, unidadInp);
-
-            offlineQueue.push({ id: Date.now().toString(), fecha: new Date().toLocaleDateString('es-ES'), ejercicio: ej, serie: serieVal, valor: valorInp, peso: pesoInp || 'N/A', unidad: unidadInp });
-            localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
-            
-            row.classList.add('completed'); btn.innerHTML = '✔';
-            document.getElementById(`valor-${indexEj}-${indexSerie}`).disabled = true;
-            document.getElementById(`peso-${indexEj}-${indexSerie}`).disabled = true;
-            document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = true;
-
-            seriesCompletadas++; actualizarProgreso(); iniciarDescansoGlobal(90); actualizarEstadoRed();
-            verificarEstadoTarjeta(indexEj);
-        }
-
-        function iniciarTimerActivo(indexEj, valor, unidad) {
-            clearInterval(activeTimers[indexEj]);
-            let seg = unidad === 'minutos' ? valor * 60 : parseInt(valor);
-            const disp = document.getElementById(`display-timer-${indexEj}`);
-            disp.style.display = 'block';
-            activeTimers[indexEj] = setInterval(() => {
-                disp.innerText = `${String(Math.floor(seg / 60)).padStart(2, '0')}:${String(seg % 60).padStart(2, '0')}`;
-                if (seg <= 0) { clearInterval(activeTimers[indexEj]); disp.style.display = 'none'; }
-                seg--;
-            }, 1000);
-        }
-
-        function actualizarProgreso() {
-            const pct = seriesTotales === 0 ? 0 : Math.round((seriesCompletadas / seriesTotales) * 100);
-            document.getElementById('progress-bar').style.width = `${pct}%`;
-            document.getElementById('progress-text-val').innerText = pct;
-        }
-
-        function iniciarDescansoGlobal(segundos) {
-            clearInterval(globalRestInterval);
-            const box = document.getElementById('global-rest-timer');
-            box.style.display = 'block';
-            let rest = segundos;
-            globalRestInterval = setInterval(() => {
-                box.innerText = `⏳ ${String(Math.floor(rest / 60)).padStart(2, '0')}:${String(rest % 60).padStart(2, '0')}`;
-                if (rest <= 0) { clearInterval(globalRestInterval); box.innerText = "¡A entrenar!"; setTimeout(()=>box.style.display='none', 3000); }
-                rest--;
-            }, 1000);
-        }
-
-        function abrirModalResumen() {
-            document.getElementById('modal-overlay').style.display = 'block';
-            document.getElementById('modal-resumen').style.display = 'flex';
-        }
-        function cerrarModalResumen() {
-            document.getElementById('modal-overlay').style.display = 'none';
-            document.getElementById('modal-resumen').style.display = 'none';
-        }
-
-        function confirmarFinRutina() {
-            const tiempo = document.getElementById('resumen-tiempo').value;
-            const comentarios = document.getElementById('resumen-comentarios').value;
-            if(!tiempo) return alert("Por favor, ingresa el tiempo total.");
-
-            offlineQueue.push({ type: 'summary', id: Date.now().toString(), fecha: new Date().toLocaleDateString('es-ES'), rutina: rutinaActiva[0].rutina, tiempo: tiempo, comentarios: comentarios });
-            localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
-
-            cerrarModalResumen();
-            document.getElementById('resumen-tiempo').value = '';
-            document.getElementById('resumen-comentarios').value = '';
-
-            entrenamientoEnCurso = false;
-            navegarA('dashboard');
-            clearInterval(globalRestInterval);
-            document.getElementById('global-rest-timer').style.display = 'none';
-            
-            sincronizarDatos();
-            setTimeout(inicializar, 4000); 
-        }
-
-        async function sincronizarDatos() {
-            if (!navigator.onLine || offlineQueue.length === 0) { actualizarEstadoRed(); return; }
             try {
-                const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(offlineQueue) });
-                if ((await res.json()).status === 'ok') { offlineQueue = []; localStorage.setItem('giam_queue', '[]'); }
-            } catch (e) {}
-            actualizarEstadoRed();
+                const data = await fetchApi('checkMath', {
+                    rowId: currentMathProblem.rowId,
+                    userAnswer: userAnswer,
+                    expectedAnswer: currentMathProblem.respuestaEsperada
+                });
+                onMathChecked(data.isCorrect);
+            } catch (error) {
+                onServerError(error);
+            }
         }
 
-        function actualizarEstadoRed() {
-            document.getElementById('sync-status').innerText = navigator.onLine ? `Sincronizado. Pendientes: ${offlineQueue.length}` : `Sin conexión. Cola: ${offlineQueue.length}`;
+        function onMathChecked(isCorrect) {
+            showLoading(false);
+            const feedbackEl = document.getElementById('math-feedback');
+            
+            if (isCorrect) {
+                consecutiveMathWins++;
+                if (consecutiveMathWins >= 2 && currentDifficultyLevel < 5) {
+                    currentDifficultyLevel++;
+                    consecutiveMathWins = 0;
+                }
+                feedbackEl.innerText = getRandomMessage(successMessages);
+                feedbackEl.className = 'feedback-msg success';
+                triggerConfetti();
+            } else {
+                consecutiveMathWins = 0;
+                if (currentDifficultyLevel > 1) currentDifficultyLevel--;
+                feedbackEl.innerText = getRandomMessage(errorMessages);
+                feedbackEl.className = 'feedback-msg error';
+            }
+            document.getElementById('btn-next-math').style.display = 'flex';
         }
 
-        function abrirModal(src) { document.getElementById('modal-img').src = src; document.getElementById('media-modal').style.display = 'flex'; }
-        function cerrarModal() { document.getElementById('media-modal').style.display = 'none'; }
+        document.getElementById('math-answer').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkMathAnswer();
+        });
 
-        window.addEventListener('online', sincronizarDatos);
-        window.addEventListener('offline', actualizarEstadoRed);
-        inicializar();
+        document.getElementById('speech-speed').addEventListener('input', function(e) {
+            const val = parseFloat(e.target.value);
+            const label = document.getElementById('speed-value');
+            if(val <= 0.4) label.innerText = "Muy Lenta 🐢";
+            else if(val <= 0.7) label.innerText = "Lenta 🚶‍♀️";
+            else label.innerText = "Normal 🏃‍♀️";
+        });
+
+        function startDictation() {
+            showView('view-dictation');
+            document.querySelector('.header p').innerText = "Escucha atenta y escribe bonito en tu hoja.";
+            document.querySelector('.play-row').style.display = 'flex';
+            document.getElementById('btn-load-next-dict').style.display = 'block';
+            currentDictationId = null;
+            loadNextDictation();
+        }
+
+        async function loadNextDictation() {
+            stopDictation();
+            showLoading(true);
+            
+            if (currentDictationId) {
+                fetchApi('markDictation', { rowId: currentDictationId }).catch(e => console.log(e));
+                currentDictationId = null;
+            }
+
+            document.getElementById('dictation-text').innerHTML = '';
+            document.getElementById('btn-next-sentence').style.display = 'none';
+            document.querySelector('.play-row').style.display = 'flex';
+            document.getElementById('btn-load-next-dict').style.display = 'block';
+            
+            try {
+                const data = await fetchApi('getDictation');
+                onDictationLoaded(data && data.rowId ? data : null);
+            } catch (error) {
+                onServerError(error);
+            }
+        }
+
+        function onDictationLoaded(data) {
+            showLoading(false);
+            if (!data) {
+                document.getElementById('dictation-text').innerHTML = "<br>¡Felicitaciones! 🎉 Los has resuelto todos. Ve con tu papá a pedirle más ejercicios.";
+                document.querySelector('.play-row').style.display = 'none';
+                document.getElementById('btn-load-next-dict').style.display = 'none';
+                triggerConfetti();
+                return;
+            }
+            
+            currentDictationId = data.rowId;
+            currentDictationText = data.texto;
+            let rawSentences = data.texto.split(/(?<=\.)\s+/);
+            dictationSentences = rawSentences.filter(s => s.trim().length > 0);
+            currentSentenceIndex = 0;
+            
+            let htmlContent = '';
+            dictationSentences.forEach((sentence, index) => {
+                htmlContent += `<span id="sent-${index}" class="sentence">${sentence} </span>`;
+            });
+            document.getElementById('dictation-text').innerHTML = htmlContent;
+        }
+
+        function playCurrentSentence() {
+            if (dictationSentences.length === 0) return;
+            speechSynthesis.cancel();
+            
+            document.querySelectorAll('.sentence').forEach(el => el.classList.remove('highlight'));
+            const currentSpan = document.getElementById(`sent-${currentSentenceIndex}`);
+            if(currentSpan) currentSpan.classList.add('highlight');
+
+            speechUtterance = new SpeechSynthesisUtterance(dictationSentences[currentSentenceIndex]);
+            speechUtterance.lang = 'es-ES'; 
+            speechUtterance.rate = parseFloat(document.getElementById('speech-speed').value); 
+
+            speechUtterance.onstart = function() {
+                updatePlayButtonUI(true);
+            };
+
+            speechUtterance.onend = function() {
+                updatePlayButtonUI(false);
+                if (currentSentenceIndex < dictationSentences.length - 1) {
+                    document.getElementById('btn-next-sentence').style.display = 'flex';
+                } else {
+                    document.getElementById('btn-next-sentence').style.display = 'none';
+                    triggerConfetti();
+                }
+            };
+
+            speechUtterance.onerror = function(e) {
+                console.error(e);
+                updatePlayButtonUI(false);
+            };
+
+            speechSynthesis.speak(speechUtterance);
+        }
+
+        function nextSentence() {
+            if (currentSentenceIndex < dictationSentences.length - 1) {
+                currentSentenceIndex++;
+                document.getElementById('btn-next-sentence').style.display = 'none';
+                playCurrentSentence();
+            }
+        }
+
+        function stopDictation() {
+            speechSynthesis.cancel();
+            updatePlayButtonUI(false);
+            document.querySelectorAll('.sentence').forEach(el => el.classList.remove('highlight'));
+        }
+
+        function updatePlayButtonUI(isPlaying) {
+            const btn = document.getElementById('btn-play-dictation');
+            const icon = document.getElementById('play-icon');
+            if (isPlaying) {
+                btn.classList.add('playing');
+                icon.className = 'fa-solid fa-volume-high';
+            } else {
+                btn.classList.remove('playing');
+                icon.className = 'fa-solid fa-play';
+            }
+        }
+
+        function onServerError(error) {
+            showLoading(false);
+            console.error(error);
+            alert("Hubo un problemita de conexión. ¡Prueba de nuevo, Luchi!");
+        }
     </script>
 </body>
 </html>
