@@ -22,7 +22,20 @@
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif !important; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; padding-bottom: 120px; }
+        
+        /* Ajustes de vista para PC/Ordenador */
+        html { background-color: #cbd5e1; }
+        body { 
+            max-width: 500px; 
+            margin: 0 auto; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            padding: 20px; 
+            padding-bottom: 120px; 
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0,0,0,0.1);
+        }
         
         header { display: flex; justify-content: center; align-items: center; min-height: 60px; margin-bottom: 20px; }
         header img { max-width: 120px; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.05)); }
@@ -82,17 +95,17 @@
         .series-row.completed .btn-play { background-color: var(--success); color: #fff; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
         .btn-play:active { transform: scale(0.9); }
 
-        .btn-add-serie { width: 100%; padding: 15px; background: none; border: none; color: var(--primary); font-weight: 700; font-size: 0.95rem; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .btn-add-serie { width: 100%; padding: 15px; background: none; border: none; color: var(--primary); font-weight: 700; font-size: 0.95rem; cursor: pointer; }
         .active-timer-display { font-size: 2.2rem; text-align: center; color: var(--primary); font-weight: 700; margin: 15px 0; display: none; }
         
-        .workout-footer { position: fixed; bottom: 70px; left: 0; width: 100%; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 90; }
+        .workout-footer { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 90; }
         .btn-finish { padding: 16px 20px; background: linear-gradient(90deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 12px; font-weight: 700; flex: 1; text-align: center; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3); cursor: pointer; text-transform: uppercase; font-size: 0.95rem; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--panel-bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--border); z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.03); }
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background-color: var(--panel-bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--border); z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.03); }
         .nav-item { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; }
         .nav-item.active { color: var(--primary); }
 
-        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background-color: var(--panel-bg); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px 25px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
+        .bottom-sheet { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background-color: var(--panel-bg); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px 25px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
         .bottom-sheet.open { bottom: 0; }
         .sheet-close { position: absolute; top: 15px; right: 25px; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; }
         .sheet-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 15px; }
@@ -493,7 +506,10 @@
                         <div id="display-timer-${indexEj}" class="active-timer-display">00:00</div>
                         <div class="series-header"><div class="col-serie">Serie</div><div class="col-valor">Objetivo</div><div class="col-peso">kg</div><div class="col-action"></div></div>
                         <div id="series-container-${indexEj}">${rowsHtml}</div>
-                        <button class="btn-add-serie" onclick="agregarFilaSerie(${indexEj})">+ Añadir serie nueva</button>
+                        <div style="border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;">
+                            <button class="btn-add-serie" onclick="agregarFilaSerie(${indexEj})" style="border-bottom: none; padding-bottom: 5px;">+ Añadir serie nueva</button>
+                            <button class="btn-add-serie" onclick="eliminarUltimaSerie(${indexEj})" style="color: var(--danger); font-size: 0.85rem; padding-top: 5px;">- Eliminar última serie añadida</button>
+                        </div>
                     </div>
                 `;
                 list.appendChild(card);
@@ -518,8 +534,26 @@
             const indexSerie = container.children.length;
             container.insertAdjacentHTML('beforeend', generarHtmlFilaSerie(indexEj, indexSerie, `Serie ${indexSerie + 1}`, '', '', 'repeticiones'));
             seriesTotales++; actualizarProgreso();
-            document.getElementById(`subtitle-${indexEj}`).innerText = `${indexSerie + 1} series marcadas`;
+            document.getElementById(`subtitle-${indexEj}`).innerText = `${container.children.length} series marcadas`;
             verificarEstadoTarjeta(indexEj);
+        }
+        
+        function eliminarUltimaSerie(indexEj) {
+            const container = document.getElementById(`series-container-${indexEj}`);
+            const rows = container.querySelectorAll('.series-row');
+            if (rows.length === 0) return;
+
+            const lastRow = rows[rows.length - 1];
+            if (lastRow.classList.contains('completed')) {
+                alert("No puedes eliminar una serie que ya marcaste como completada. Desmárcala dándole al botón de '✔' primero.");
+                return;
+            }
+
+            lastRow.remove();
+            seriesTotales--;
+            actualizarProgreso();
+            verificarEstadoTarjeta(indexEj);
+            document.getElementById(`subtitle-${indexEj}`).innerText = `${container.children.length} series marcadas`;
         }
 
         function toggleBody(index) {
