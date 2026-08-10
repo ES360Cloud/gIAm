@@ -23,7 +23,6 @@
         
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif !important; }
         
-        /* Ajustes de vista para PC/Ordenador */
         html { background-color: #cbd5e1; }
         body { 
             max-width: 500px; 
@@ -44,8 +43,8 @@
         .dash-header { font-size: 1.05rem; font-weight: 700; margin-bottom: 15px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; }
         
         .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .heatmap-box { aspect-ratio: 1; border-radius: 6px; background-color: #e2e8f0; transition: transform 0.2s; cursor: pointer; }
-        .heatmap-box.active { background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: 0 2px 5px rgba(0, 229, 255, 0.3); }
+        .heatmap-box { aspect-ratio: 1; border-radius: 6px; background-color: #e2e8f0; transition: transform 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #94a3b8; }
+        .heatmap-box.active { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; box-shadow: 0 2px 5px rgba(0, 229, 255, 0.3); }
         .heatmap-box:active { transform: scale(0.9); }
         
         .btn-main-action { width: 100%; padding: 18px; background: linear-gradient(90deg, var(--primary), #0056c7); color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 20px rgba(0, 71, 165, 0.25); transition: transform 0.2s; margin-bottom: 10px; }
@@ -105,7 +104,7 @@
         .nav-item { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; }
         .nav-item.active { color: var(--primary); }
 
-        .bottom-sheet { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background-color: var(--panel-bg); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px 25px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
+        .bottom-sheet { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background-color: var(--panel-bg); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 30px 25px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; max-height: 85vh; overflow-y: auto; }
         .bottom-sheet.open { bottom: 0; }
         .sheet-close { position: absolute; top: 15px; right: 25px; font-size: 1.8rem; color: var(--text-muted); cursor: pointer; }
         .sheet-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 15px; }
@@ -211,7 +210,20 @@
         <div class="sheet-title" id="sheet-title">Fecha</div>
         <div class="sheet-data" id="sheet-rutinas">Rutinas: -</div>
         <div class="sheet-data" id="sheet-series">Series completadas: -</div>
-        <div class="sheet-data" id="sheet-volumen">Volumen (kg): -</div>
+        <div class="sheet-data" id="sheet-volumen">Volumen Total: -</div>
+        
+        <!-- BOTONES DE EDICIÓN HISTÓRICA -->
+        <div id="sheet-actions" style="margin-top: 25px; display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn-main-action" id="btn-repetir-rutina" style="padding: 15px; font-size: 0.95rem;">▶ Repetir esta rutina hoy</button>
+            <button class="btn-main-action btn-cancel" id="btn-editar-rutina" style="padding: 15px; font-size: 0.95rem; margin-bottom: 0;">✏️ Modificar esta sesión</button>
+        </div>
+
+        <!-- CONTENEDOR DE EDICIÓN EN CALIENTE -->
+        <div id="sheet-editor-box" style="display:none; margin-top:20px;">
+            <div style="font-weight:700; color:var(--danger); font-size:0.8rem; margin-bottom:10px;">ADVERTENCIA: Estás editando una sesión pasada. Esto recalculará tus progresos.</div>
+            <div id="editor-rows"></div>
+            <button class="btn-main-action" id="btn-guardar-edicion" style="margin-top:15px; background:var(--success);">Guardar Cambios</button>
+        </div>
     </div>
 
     <div class="overlay-bg" id="modal-overlay"></div>
@@ -240,6 +252,9 @@
         let datosApp = { rutinas: [], catalogo: [], historial: {}, heatmap: {}, stats: {}, reportes: [] };
         let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
         
+        // --- ESTADO LOCAL PARA PERSISTENCIA ---
+        let localState = JSON.parse(localStorage.getItem('giam_state')) || { enCurso: false, rutinaNom: '', ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
+        
         let rutinaActiva = [];
         let entrenamientoEnCurso = false;
         let globalRestInterval;
@@ -248,6 +263,8 @@
         let seriesCompletadas = 0;
         let chartInstances = [];
         let historyChart;
+
+        function generarID() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
 
         function convertirUrlDrive(url) {
             if (!url) return '';
@@ -265,6 +282,16 @@
             } catch (error) {
                 const guardados = localStorage.getItem('giam_datos');
                 if (guardados) { datosApp = JSON.parse(guardados); renderizarTodo(); } 
+            }
+
+            // AUTO-RESTAURACIÓN DE SESIÓN SI SE CERRÓ YOUTUBE/NAVEGADOR
+            if (localState && localState.enCurso) {
+                if(confirm("Tienes un entrenamiento en pausa. ¿Quieres retomarlo exactamente donde lo dejaste?")) {
+                    restaurarEntrenamientoDesdeEstado();
+                } else {
+                    localState = { enCurso: false, rutinaNom: '', ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
+                    localStorage.setItem('giam_state', JSON.stringify(localState));
+                }
             }
         }
 
@@ -327,8 +354,13 @@
             entrenamientoEnCurso = false;
             clearInterval(globalRestInterval);
             document.getElementById('global-rest-timer').style.display = 'none';
+            
+            // LIMPIAR COLAS Y ESTADOS
             offlineQueue = [];
             localStorage.setItem('giam_queue', '[]');
+            localState = { enCurso: false, rutinaNom: '', ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
+            localStorage.setItem('giam_state', JSON.stringify(localState));
+            
             actualizarEstadoRed();
             navegarA('dashboard');
         }
@@ -344,6 +376,7 @@
                 const dataDia = datosApp.heatmap[dateKey];
                 const box = document.createElement('div');
                 box.className = `heatmap-box ${dataDia ? 'active' : ''}`;
+                box.innerText = d.getDate(); // AHORA SE VE EL NUMERO
                 if (dataDia) box.onclick = () => abrirSheet(dataDia);
                 container.appendChild(box);
             }
@@ -354,8 +387,68 @@
             document.getElementById('sheet-rutinas').innerHTML = `<strong>Rutinas:</strong> ${data.rutinas.join(', ')}`;
             document.getElementById('sheet-series').innerHTML = `<strong>Series completadas:</strong> ${data.series}`;
             document.getElementById('sheet-volumen').innerHTML = `<strong>Volumen Total:</strong> ${data.volumen.toLocaleString()} kg`;
+            
+            document.getElementById('sheet-actions').style.display = 'flex';
+            document.getElementById('sheet-editor-box').style.display = 'none';
+
+            // REPETIR RUTINA
+            document.getElementById('btn-repetir-rutina').onclick = () => { cerrarSheet(); iniciarRutina(data.rutinas[0]); };
+            
+            // MODIFICAR RUTINA
+            document.getElementById('btn-editar-rutina').onclick = () => abrirEditorHistorico(data);
+
             document.getElementById('heatmap-sheet').classList.add('open');
             document.getElementById('sheet-overlay').style.display = 'block';
+        }
+
+        function abrirEditorHistorico(data) {
+            document.getElementById('sheet-actions').style.display = 'none';
+            const editor = document.getElementById('sheet-editor-box');
+            const rowsCont = document.getElementById('editor-rows');
+            editor.style.display = 'block';
+            rowsCont.innerHTML = '';
+            
+            // Listar las series de ese dia
+            data.desglose.forEach((s, i) => {
+                rowsCont.innerHTML += `
+                    <div style="display:flex; gap:5px; margin-bottom:5px; align-items:center; background:#f8fafc; padding:8px; border-radius:6px; border:1px solid var(--border);">
+                        <div style="font-size:0.75rem; font-weight:700; width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.ej}</div>
+                        <input type="number" class="input-compact" id="edit-val-${i}" value="${s.valor}" style="padding:5px;">
+                        <input type="number" class="input-compact" id="edit-peso-${i}" value="${s.peso}" style="padding:5px;">
+                        <input type="hidden" id="edit-id-${i}" value="${s.id}">
+                        <input type="hidden" id="edit-ej-${i}" value="${s.ej}">
+                        <input type="hidden" id="edit-ser-${i}" value="${s.serie}">
+                        <input type="hidden" id="edit-un-${i}" value="${s.unidad}">
+                    </div>
+                `;
+            });
+
+            document.getElementById('btn-guardar-edicion').onclick = async () => {
+                document.getElementById('btn-guardar-edicion').innerText = "Guardando...";
+                const newRecords = [];
+                const idsOriginales = data.desglose.map(s => s.id);
+                
+                data.desglose.forEach((s, i) => {
+                    newRecords.push({
+                        fecha: data.fechaCompleta,
+                        ejercicio: document.getElementById(`edit-ej-${i}`).value,
+                        serie: document.getElementById(`edit-ser-${i}`).value,
+                        valor: document.getElementById(`edit-val-${i}`).value,
+                        peso: document.getElementById(`edit-peso-${i}`).value,
+                        unidad: document.getElementById(`edit-un-${i}`).value,
+                        id: document.getElementById(`edit-id-${i}`).value
+                    });
+                });
+
+                const payload = { action: 'edit_session', fecha: data.fechaCompleta, idsOriginales: idsOriginales, newRecords: newRecords };
+                
+                try {
+                    await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                    alert("Sesión actualizada. Los cambios se verán reflejados al reiniciar la app.");
+                    cerrarSheet();
+                    inicializar(); // Refrescar info
+                } catch(e) { alert("Error al guardar."); document.getElementById('btn-guardar-edicion').innerText = "Guardar Cambios"; }
+            };
         }
 
         function cerrarSheet() {
@@ -468,63 +561,149 @@
             });
         }
 
+        /* --- MOTOR DE RUTINAS CON ESTADO LOCAL Y UUID --- */
+
+        // Captura todo lo que ves en pantalla y lo guarda en el LocalStorage
+        function guardarEstadoLocalDesdeDOM() {
+            if (!entrenamientoEnCurso) return;
+            localState.seriesTotales = seriesTotales;
+            localState.seriesCompletadas = seriesCompletadas;
+            localState.ejercicios = [];
+            
+            rutinaActiva.forEach((ej, indexEj) => {
+                const container = document.getElementById(`series-container-${indexEj}`);
+                if(!container) return;
+                const rows = container.querySelectorAll('.series-row');
+                let seriesArr = [];
+                rows.forEach((row, indexSerie) => {
+                    seriesArr.push({
+                        serieNom: document.getElementById(`serieNom-${indexEj}-${indexSerie}`).value,
+                        valor: document.getElementById(`valor-${indexEj}-${indexSerie}`).value,
+                        peso: document.getElementById(`peso-${indexEj}-${indexSerie}`).value,
+                        unidad: document.getElementById(`unidad-${indexEj}-${indexSerie}`).value,
+                        completed: row.classList.contains('completed'),
+                        id: document.getElementById(`id-${indexEj}-${indexSerie}`).value
+                    });
+                });
+                const bodyDiv = document.getElementById(`body-${indexEj}`);
+                localState.ejercicios.push({ 
+                    nombre: ej.ejercicio, 
+                    abierto: bodyDiv ? bodyDiv.classList.contains('open') : false,
+                    series: seriesArr 
+                });
+            });
+            localStorage.setItem('giam_state', JSON.stringify(localState));
+        }
+
         function iniciarRutina(nombreRutina) {
             rutinaActiva = datosApp.catalogo.filter(item => item.rutina === nombreRutina).sort((a, b) => a.orden - b.orden);
             if (rutinaActiva.length === 0) return alert("Rutina sin ejercicios.");
+            
             seriesTotales = 0; seriesCompletadas = 0; entrenamientoEnCurso = true;
+            localState = { enCurso: true, rutinaNom: nombreRutina, rutinaActiva: rutinaActiva, ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
+            
             navegarA('workout');
-            renderizarListaEntrenamiento();
+            renderizarListaEntrenamiento(true); // true = generar desde 0
+            guardarEstadoLocalDesdeDOM();
             actualizarProgreso();
         }
 
-        function renderizarListaEntrenamiento() {
+        function restaurarEntrenamientoDesdeEstado() {
+            rutinaActiva = localState.rutinaActiva;
+            seriesTotales = localState.seriesTotales;
+            seriesCompletadas = localState.seriesCompletadas;
+            entrenamientoEnCurso = true;
+            
+            navegarA('workout');
+            renderizarListaEntrenamiento(false); // false = restaurar desde localState
+            actualizarProgreso();
+        }
+
+        function renderizarListaEntrenamiento(desdeCero) {
             const list = document.getElementById('exercise-list');
             list.innerHTML = '';
             
-            rutinaActiva.forEach((ej, indexEj) => {
-                const histList = datosApp.historial[ej.ejercicio] || [{ serie: '1', valor: '', peso: '', unidad: 'repeticiones' }];
-                seriesTotales += histList.length;
+            rutinaActiva.forEach((ejInfo, indexEj) => {
+                let seriesArr = [];
+                let abierto = (indexEj === 0);
+
+                if (desdeCero) {
+                    const histList = datosApp.historial[ejInfo.ejercicio] || [{ serie: '1', valor: '', peso: '', unidad: 'repeticiones' }];
+                    histList.forEach(s => {
+                        seriesArr.push({ serieNom: s.serie, valor: s.valor, peso: s.peso, unidad: s.unidad, completed: false, id: generarID() });
+                        seriesTotales++;
+                    });
+                } else {
+                    const savedEj = localState.ejercicios[indexEj];
+                    if(savedEj) {
+                        seriesArr = savedEj.series;
+                        abierto = savedEj.abierto;
+                    }
+                }
 
                 const card = document.createElement('div');
                 card.className = 'exercise-card';
                 card.id = `card-${indexEj}`;
                 
                 let rowsHtml = '';
-                histList.forEach((s, indexSerie) => { rowsHtml += generarHtmlFilaSerie(indexEj, indexSerie, s.serie, s.valor, s.peso, s.unidad); });
+                seriesArr.forEach((s, indexSerie) => { 
+                    rowsHtml += generarHtmlFilaSerie(indexEj, indexSerie, s.serieNom, s.valor, s.peso, s.unidad, s.completed, s.id); 
+                });
 
-                const imgUrl = convertirUrlDrive(ej.media);
+                const imgUrl = convertirUrlDrive(ejInfo.media);
 
                 card.innerHTML = `
                     <div class="ex-header" onclick="toggleBody(${indexEj})">
                         <div class="ex-title-box">
-                            <span class="ex-title">${ej.ejercicio}</span>
-                            <span class="ex-subtitle" id="subtitle-${indexEj}">${histList.length} series marcadas</span>
+                            <span class="ex-title">${ejInfo.ejercicio}</span>
+                            <span class="ex-subtitle" id="subtitle-${indexEj}">${seriesArr.length} series marcadas</span>
                         </div>
                         <img src="${imgUrl}" class="media-thumbnail" style="${imgUrl ? 'display:block;' : 'display:none;'}" onclick="event.stopPropagation(); abrirModal('${imgUrl}')">
                     </div>
-                    <div class="ex-body" id="body-${indexEj}">
+                    <div class="ex-body ${abierto ? 'open' : ''}" id="body-${indexEj}">
                         <div id="display-timer-${indexEj}" class="active-timer-display">00:00</div>
                         <div class="series-header"><div class="col-serie">Serie</div><div class="col-valor">Objetivo</div><div class="col-peso">kg</div><div class="col-action"></div></div>
                         <div id="series-container-${indexEj}">${rowsHtml}</div>
                         <div style="border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;">
                             <button class="btn-add-serie" onclick="agregarFilaSerie(${indexEj})" style="border-bottom: none; padding-bottom: 5px;">+ Añadir serie nueva</button>
-                            <button class="btn-add-serie" onclick="eliminarUltimaSerie(${indexEj})" style="color: var(--danger); font-size: 0.85rem; padding-top: 5px;">- Eliminar última serie añadida</button>
+                            <button class="btn-add-serie" onclick="eliminarUltimaSerie(${indexEj})" style="color: var(--danger); font-size: 0.85rem; padding-top: 5px;">- Eliminar última serie</button>
                         </div>
                     </div>
                 `;
                 list.appendChild(card);
+                if (abierto) card.classList.add('active-card');
+                verificarEstadoTarjeta(indexEj);
             });
-            if(rutinaActiva.length > 0) toggleBody(0);
         }
 
-        function generarHtmlFilaSerie(indexEj, indexSerie, serieNom, valor, peso, unidad) {
+        function generarHtmlFilaSerie(indexEj, indexSerie, serieNom, valor, peso, unidad, completed = false, id = null) {
             const numLabel = String(serieNom).replace(/\D/g, '') || (indexSerie + 1);
+            const myId = id || generarID();
+            const checkedClass = completed ? 'completed' : '';
+            const btnIcon = completed ? '✔' : '▶';
+            const disabledState = completed ? 'disabled' : '';
+
             return `
-                <div class="series-row" id="row-${indexEj}-${indexSerie}">
-                    <div class="col-serie"><div style="font-weight:700; color:var(--text-main);">${numLabel}</div><input type="hidden" id="serieNom-${indexEj}-${indexSerie}" value="Serie ${numLabel}"></div>
-                    <div class="col-valor"><input type="number" class="input-compact" id="valor-${indexEj}-${indexSerie}" value="${valor}"><select class="select-compact" id="unidad-${indexEj}-${indexSerie}"><option value="repeticiones" ${unidad === 'repeticiones' ? 'selected' : ''}>Reps</option><option value="minutos" ${unidad === 'minutos' ? 'selected' : ''}>Min</option><option value="segundos" ${unidad === 'segundos' ? 'selected' : ''}>Seg</option></select></div>
-                    <div class="col-peso"><input type="text" class="input-compact" id="peso-${indexEj}-${indexSerie}" value="${peso}"></div>
-                    <div class="col-action"><button class="btn-play" id="btn-play-${indexEj}-${indexSerie}" onclick="ejecutarSerie(${indexEj}, ${indexSerie})">▶</button></div>
+                <div class="series-row ${checkedClass}" id="row-${indexEj}-${indexSerie}">
+                    <div class="col-serie">
+                        <div style="font-weight:700; color:var(--text-main);">${numLabel}</div>
+                        <input type="hidden" id="serieNom-${indexEj}-${indexSerie}" value="Serie ${numLabel}">
+                        <input type="hidden" id="id-${indexEj}-${indexSerie}" value="${myId}">
+                    </div>
+                    <div class="col-valor">
+                        <input type="number" class="input-compact" id="valor-${indexEj}-${indexSerie}" value="${valor}" onchange="guardarEstadoLocalDesdeDOM()" ${disabledState}>
+                        <select class="select-compact" id="unidad-${indexEj}-${indexSerie}" onchange="guardarEstadoLocalDesdeDOM()" ${disabledState}>
+                            <option value="repeticiones" ${unidad === 'repeticiones' ? 'selected' : ''}>Reps</option>
+                            <option value="minutos" ${unidad === 'minutos' ? 'selected' : ''}>Min</option>
+                            <option value="segundos" ${unidad === 'segundos' ? 'selected' : ''}>Seg</option>
+                        </select>
+                    </div>
+                    <div class="col-peso">
+                        <input type="text" class="input-compact" id="peso-${indexEj}-${indexSerie}" value="${peso}" onchange="guardarEstadoLocalDesdeDOM()" ${disabledState}>
+                    </div>
+                    <div class="col-action">
+                        <button class="btn-play" id="btn-play-${indexEj}-${indexSerie}" onclick="ejecutarSerie(${indexEj}, ${indexSerie})">${btnIcon}</button>
+                    </div>
                 </div>
             `;
         }
@@ -536,6 +715,7 @@
             seriesTotales++; actualizarProgreso();
             document.getElementById(`subtitle-${indexEj}`).innerText = `${container.children.length} series marcadas`;
             verificarEstadoTarjeta(indexEj);
+            guardarEstadoLocalDesdeDOM();
         }
         
         function eliminarUltimaSerie(indexEj) {
@@ -554,6 +734,7 @@
             actualizarProgreso();
             verificarEstadoTarjeta(indexEj);
             document.getElementById(`subtitle-${indexEj}`).innerText = `${container.children.length} series marcadas`;
+            guardarEstadoLocalDesdeDOM();
         }
 
         function toggleBody(index) {
@@ -568,10 +749,12 @@
                 body.classList.add('open');
                 card.classList.add('active-card');
             }
+            guardarEstadoLocalDesdeDOM();
         }
 
         function verificarEstadoTarjeta(indexEj) {
             const container = document.getElementById(`series-container-${indexEj}`);
+            if(!container) return;
             const total = container.querySelectorAll('.series-row').length;
             const completadas = container.querySelectorAll('.series-row.completed').length;
             const card = document.getElementById(`card-${indexEj}`);
@@ -583,13 +766,19 @@
         function ejecutarSerie(indexEj, indexSerie) {
             const row = document.getElementById(`row-${indexEj}-${indexSerie}`);
             const btn = document.getElementById(`btn-play-${indexEj}-${indexSerie}`);
+            const idInp = document.getElementById(`id-${indexEj}-${indexSerie}`).value;
             
             if(row.classList.contains('completed')) {
                 row.classList.remove('completed'); btn.innerHTML = '▶';
                 document.getElementById(`valor-${indexEj}-${indexSerie}`).disabled = false;
                 document.getElementById(`peso-${indexEj}-${indexSerie}`).disabled = false;
                 document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = false;
-                seriesCompletadas--; actualizarProgreso(); verificarEstadoTarjeta(indexEj); return;
+                
+                // Sacar de la cola si desmarca (DEDUPLICACION ACTIVA Y CORREGIDA)
+                offlineQueue = offlineQueue.filter(req => req.id !== idInp);
+                localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
+
+                seriesCompletadas--; actualizarProgreso(); verificarEstadoTarjeta(indexEj); guardarEstadoLocalDesdeDOM(); return;
             }
 
             const ej = rutinaActiva[indexEj].ejercicio;
@@ -602,7 +791,8 @@
 
             if(unidadInp === 'minutos' || unidadInp === 'segundos') iniciarTimerActivo(indexEj, valorInp, unidadInp);
 
-            offlineQueue.push({ id: Date.now().toString(), fecha: new Date().toLocaleDateString('es-ES'), ejercicio: ej, serie: serieVal, valor: valorInp, peso: pesoInp || 'N/A', unidad: unidadInp });
+            // AHORA MANDAMOS EL UUID EXACTO GENERADO AL INICIO DE LA SERIE
+            offlineQueue.push({ id: idInp, fecha: new Date().toLocaleDateString('es-ES'), ejercicio: ej, serie: serieVal, valor: valorInp, peso: pesoInp || 'N/A', unidad: unidadInp });
             localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
             
             row.classList.add('completed'); btn.innerHTML = '✔';
@@ -611,7 +801,7 @@
             document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = true;
 
             seriesCompletadas++; actualizarProgreso(); iniciarDescansoGlobal(90); actualizarEstadoRed();
-            verificarEstadoTarjeta(indexEj);
+            verificarEstadoTarjeta(indexEj); guardarEstadoLocalDesdeDOM();
         }
 
         function iniciarTimerActivo(indexEj, valor, unidad) {
@@ -665,7 +855,11 @@
             document.getElementById('resumen-tiempo').value = '';
             document.getElementById('resumen-comentarios').value = '';
 
+            // LIQUIDAR ESTADOS LOCALES
             entrenamientoEnCurso = false;
+            localState = { enCurso: false, rutinaNom: '', ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
+            localStorage.setItem('giam_state', JSON.stringify(localState));
+
             navegarA('dashboard');
             clearInterval(globalRestInterval);
             document.getElementById('global-rest-timer').style.display = 'none';
