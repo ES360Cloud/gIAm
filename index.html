@@ -47,7 +47,7 @@
         .heatmap-box.active { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; box-shadow: 0 2px 5px rgba(0, 229, 255, 0.3); }
         .heatmap-box:active { transform: scale(0.9); }
         
-        .btn-main-action { width: 100%; padding: 18px; background: linear-gradient(90deg, var(--primary), #0056c7); color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 20px rgba(0, 71, 165, 0.25); transition: transform 0.2s; margin-bottom: 10px; }
+        .btn-main-action { width: 100%; padding: 18px; color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: transform 0.2s; margin-bottom: 10px; }
         .btn-main-action:active { transform: scale(0.97); }
         
         .btn-cancel { background: transparent !important; border: 2px solid var(--danger) !important; color: var(--danger) !important; box-shadow: none !important; margin-bottom: 20px; margin-top: 5px; }
@@ -98,7 +98,7 @@
         .active-timer-display { font-size: 2.2rem; text-align: center; color: var(--primary); font-weight: 700; margin: 15px 0; display: none; }
         
         .workout-footer { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 90; }
-        .btn-finish { padding: 16px 20px; background: linear-gradient(90deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 12px; font-weight: 700; flex: 1; text-align: center; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3); cursor: pointer; text-transform: uppercase; font-size: 0.95rem; }
+        .btn-finish { padding: 14px 20px; background: linear-gradient(90deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 12px; font-weight: 700; flex: 1; text-align: center; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3); cursor: pointer; text-transform: uppercase; font-size: 0.95rem; }
         
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background-color: var(--panel-bg); display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--border); z-index: 100; box-shadow: 0 -4px 15px rgba(0,0,0,0.03); }
         .nav-item { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; }
@@ -140,8 +140,6 @@
 
     <div id="view-dashboard">
         <button class="btn-main-action" id="btn-start-workout" onclick="navegarA('selector')">+ Iniciar Sesión</button>
-        <button class="btn-main-action btn-cancel" id="btn-cancel-workout" onclick="cancelarEntrenamiento()" style="display:none;">✖ Cancelar Sesión</button>
-        <div id="sync-status" style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-bottom: 20px; font-weight: 600;"></div>
         
         <div class="dash-card">
             <div class="dash-header">Asistencia (Últimos 28 días)</div>
@@ -161,8 +159,9 @@
         <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
         <div id="exercise-list"></div>
         <div class="workout-footer">
-            <div id="global-rest-timer" style="font-size: 1.4rem; color: var(--text-main); font-weight: 700; margin-right: 20px; display: none;">00:00</div>
-            <div class="btn-finish" onclick="abrirModalResumen()">Terminar Rutina</div>
+            <div id="global-rest-timer" style="font-size: 1.4rem; color: var(--text-main); font-weight: 700; margin-right: 15px; display: none;">00:00</div>
+            <button class="btn-cancel" onclick="descartarEntrenamientoActual()" style="margin:0; padding:12px 15px; flex:0 0 auto; border-radius:12px; margin-right:15px; font-weight:700; font-size:0.9rem;">🗑️ Descartar</button>
+            <button class="btn-finish" onclick="abrirModalResumen()">Terminar</button>
         </div>
     </div>
 
@@ -212,17 +211,15 @@
         <div class="sheet-data" id="sheet-series">Series completadas: -</div>
         <div class="sheet-data" id="sheet-volumen">Volumen Total: -</div>
         
-        <!-- BOTONES DE EDICIÓN HISTÓRICA -->
         <div id="sheet-actions" style="margin-top: 25px; display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn-main-action" id="btn-repetir-rutina" style="padding: 15px; font-size: 0.95rem;">▶ Repetir esta rutina hoy</button>
+            <button class="btn-main-action" id="btn-repetir-rutina" style="padding: 15px; font-size: 0.95rem; background: linear-gradient(90deg, var(--primary), #0056c7); box-shadow: 0 8px 20px rgba(0, 71, 165, 0.25);">▶ Repetir esta rutina hoy</button>
             <button class="btn-main-action btn-cancel" id="btn-editar-rutina" style="padding: 15px; font-size: 0.95rem; margin-bottom: 0;">✏️ Modificar esta sesión</button>
         </div>
 
-        <!-- CONTENEDOR DE EDICIÓN EN CALIENTE -->
         <div id="sheet-editor-box" style="display:none; margin-top:20px;">
-            <div style="font-weight:700; color:var(--danger); font-size:0.8rem; margin-bottom:10px;">ADVERTENCIA: Estás editando una sesión pasada. Esto recalculará tus progresos.</div>
+            <div style="font-weight:700; color:var(--danger); font-size:0.8rem; margin-bottom:15px; border: 1px solid var(--danger); padding:10px; border-radius:8px;">ADVERTENCIA: Estás editando una sesión pasada. Esto borrará y recalculará tus datos de forma permanente.</div>
             <div id="editor-rows"></div>
-            <button class="btn-main-action" id="btn-guardar-edicion" style="margin-top:15px; background:var(--success);">Guardar Cambios</button>
+            <button class="btn-main-action" id="btn-guardar-edicion" style="margin-top:15px; background:var(--success); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);">Guardar Cambios</button>
         </div>
     </div>
 
@@ -231,7 +228,7 @@
         <div class="modal-title">Resumen de Sesión</div>
         <input type="text" class="input-compact" id="resumen-tiempo" placeholder="Tiempo total (ej. 45 min)" style="margin-bottom: 15px;">
         <textarea class="textarea-compact" id="resumen-comentarios" placeholder="¿Cómo te sentiste? ¿Hubo alguna molestia o récord?"></textarea>
-        <button class="btn-main-action" onclick="confirmarFinRutina()" style="margin-bottom: 0;">Guardar y Analizar</button>
+        <button class="btn-main-action" onclick="confirmarFinRutina()" style="margin-bottom: 0; background: linear-gradient(90deg, var(--primary), #0056c7);">Guardar y Analizar</button>
         <button class="btn-main-action btn-cancel" onclick="cerrarModalResumen()" style="margin-top: 10px; margin-bottom:0;">Volver al Entrenamiento</button>
     </div>
 
@@ -251,8 +248,6 @@
 
         let datosApp = { rutinas: [], catalogo: [], historial: {}, heatmap: {}, stats: {}, reportes: [] };
         let offlineQueue = JSON.parse(localStorage.getItem('giam_queue')) || [];
-        
-        // --- ESTADO LOCAL PARA PERSISTENCIA ---
         let localState = JSON.parse(localStorage.getItem('giam_state')) || { enCurso: false, rutinaNom: '', ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
         
         let rutinaActiva = [];
@@ -273,7 +268,6 @@
         }
 
         async function inicializar() {
-            actualizarEstadoRed();
             try {
                 const response = await fetch(APPS_SCRIPT_URL);
                 datosApp = await response.json();
@@ -284,15 +278,14 @@
                 if (guardados) { datosApp = JSON.parse(guardados); renderizarTodo(); } 
             }
 
-            // AUTO-RESTAURACIÓN DE SESIÓN SI SE CERRÓ YOUTUBE/NAVEGADOR
             if (localState && localState.enCurso) {
-                if(confirm("Tienes un entrenamiento en pausa. ¿Quieres retomarlo exactamente donde lo dejaste?")) {
-                    restaurarEntrenamientoDesdeEstado();
-                } else {
-                    localState = { enCurso: false, rutinaNom: '', ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
-                    localStorage.setItem('giam_state', JSON.stringify(localState));
-                }
+                entrenamientoEnCurso = true;
+                actualizarBotonInicio();
+            } else {
+                entrenamientoEnCurso = false;
+                actualizarBotonInicio();
             }
+            sincronizarDatos();
         }
 
         function renderizarTodo() {
@@ -301,6 +294,21 @@
             renderizarGraficosDashboard();
             llenarFiltros();
             renderizarReportes();
+        }
+
+        function actualizarBotonInicio() {
+            const btnStart = document.getElementById('btn-start-workout');
+            if(entrenamientoEnCurso) {
+                btnStart.innerText = '▶ RETOMAR RUTINA EN CURSO';
+                btnStart.style.background = 'var(--danger)';
+                btnStart.style.boxShadow = '0 8px 20px rgba(239, 68, 68, 0.25)';
+                btnStart.onclick = () => { restaurarEntrenamientoDesdeEstado(); navegarA('workout'); };
+            } else {
+                btnStart.innerText = '+ Iniciar Sesión';
+                btnStart.style.background = 'linear-gradient(90deg, var(--primary), #0056c7)';
+                btnStart.style.boxShadow = '0 8px 20px rgba(0, 71, 165, 0.25)';
+                btnStart.onclick = () => navegarA('selector');
+            }
         }
 
         function navegarA(vista) {
@@ -313,17 +321,9 @@
             document.getElementById('nav-history').classList.remove('active');
 
             if (vista === 'dashboard') {
-                if(entrenamientoEnCurso) {
-                    document.getElementById('btn-start-workout').innerText = '▶ Retomar Entrenamiento';
-                    document.getElementById('btn-start-workout').onclick = () => navegarA('workout');
-                    document.getElementById('btn-cancel-workout').style.display = 'block';
-                } else {
-                    document.getElementById('btn-start-workout').innerText = '+ Iniciar Sesión';
-                    document.getElementById('btn-start-workout').onclick = () => navegarA('selector');
-                    document.getElementById('btn-cancel-workout').style.display = 'none';
-                }
                 document.getElementById('view-dashboard').style.display = 'block';
                 document.getElementById('nav-dashboard').classList.add('active');
+                actualizarBotonInicio();
             } else if (vista === 'selector') {
                 document.getElementById('view-selector').style.display = 'block';
             } else if (vista === 'workout') {
@@ -349,19 +349,17 @@
             }
         }
 
-        function cancelarEntrenamiento() {
-            if(!confirm("¿Estás seguro de cancelar? Se perderán las series que hiciste en esta sesión y no se guardarán en tu registro.")) return;
+        function descartarEntrenamientoActual() {
+            if(!confirm("¿Seguro que querés borrar toda la rutina actual? Se eliminará todo tu progreso local y no se guardará en el historial.")) return;
             entrenamientoEnCurso = false;
             clearInterval(globalRestInterval);
             document.getElementById('global-rest-timer').style.display = 'none';
             
-            // LIMPIAR COLAS Y ESTADOS
             offlineQueue = [];
             localStorage.setItem('giam_queue', '[]');
             localState = { enCurso: false, rutinaNom: '', ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
             localStorage.setItem('giam_state', JSON.stringify(localState));
             
-            actualizarEstadoRed();
             navegarA('dashboard');
         }
 
@@ -376,7 +374,7 @@
                 const dataDia = datosApp.heatmap[dateKey];
                 const box = document.createElement('div');
                 box.className = `heatmap-box ${dataDia ? 'active' : ''}`;
-                box.innerText = d.getDate(); // AHORA SE VE EL NUMERO
+                box.innerText = d.getDate();
                 if (dataDia) box.onclick = () => abrirSheet(dataDia);
                 container.appendChild(box);
             }
@@ -391,10 +389,7 @@
             document.getElementById('sheet-actions').style.display = 'flex';
             document.getElementById('sheet-editor-box').style.display = 'none';
 
-            // REPETIR RUTINA
             document.getElementById('btn-repetir-rutina').onclick = () => { cerrarSheet(); iniciarRutina(data.rutinas[0]); };
-            
-            // MODIFICAR RUTINA
             document.getElementById('btn-editar-rutina').onclick = () => abrirEditorHistorico(data);
 
             document.getElementById('heatmap-sheet').classList.add('open');
@@ -408,13 +403,21 @@
             editor.style.display = 'block';
             rowsCont.innerHTML = '';
             
-            // Listar las series de ese dia
             data.desglose.forEach((s, i) => {
                 rowsCont.innerHTML += `
-                    <div style="display:flex; gap:5px; margin-bottom:5px; align-items:center; background:#f8fafc; padding:8px; border-radius:6px; border:1px solid var(--border);">
-                        <div style="font-size:0.75rem; font-weight:700; width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.ej}</div>
-                        <input type="number" class="input-compact" id="edit-val-${i}" value="${s.valor}" style="padding:5px;">
-                        <input type="number" class="input-compact" id="edit-peso-${i}" value="${s.peso}" style="padding:5px;">
+                    <div class="edit-row" id="edit-row-${i}" style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid var(--border); margin-bottom:10px;">
+                        <div style="font-weight:700; color:var(--text-main); margin-bottom:10px; font-size:1.05rem;">${s.ej} <span style="font-size:0.85rem; color:var(--text-muted); font-weight:500;">(${s.serie})</span></div>
+                        <div style="display:flex; gap:10px; align-items:flex-end;">
+                            <div style="flex:1;">
+                                <label style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Objetivo</label>
+                                <input type="number" class="input-compact" id="edit-val-${i}" value="${s.valor}">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Peso (kg)</label>
+                                <input type="number" class="input-compact" id="edit-peso-${i}" value="${s.peso}">
+                            </div>
+                            <button onclick="borrarFilaEditor(${i})" style="margin:0; padding:12px; flex:0 0 50px; background:rgba(239,68,68,0.1); border:none; color:var(--danger); border-radius:8px; font-size:1.2rem; cursor:pointer; height:43px; display:flex; justify-content:center; align-items:center;">🗑️</button>
+                        </div>
                         <input type="hidden" id="edit-id-${i}" value="${s.id}">
                         <input type="hidden" id="edit-ej-${i}" value="${s.ej}">
                         <input type="hidden" id="edit-ser-${i}" value="${s.serie}">
@@ -429,26 +432,34 @@
                 const idsOriginales = data.desglose.map(s => s.id);
                 
                 data.desglose.forEach((s, i) => {
-                    newRecords.push({
-                        fecha: data.fechaCompleta,
-                        ejercicio: document.getElementById(`edit-ej-${i}`).value,
-                        serie: document.getElementById(`edit-ser-${i}`).value,
-                        valor: document.getElementById(`edit-val-${i}`).value,
-                        peso: document.getElementById(`edit-peso-${i}`).value,
-                        unidad: document.getElementById(`edit-un-${i}`).value,
-                        id: document.getElementById(`edit-id-${i}`).value
-                    });
+                    const currentId = document.getElementById(`edit-id-${i}`).value;
+                    if (currentId !== 'DELETED') {
+                        newRecords.push({
+                            fecha: data.fechaCompleta,
+                            ejercicio: document.getElementById(`edit-ej-${i}`).value,
+                            serie: document.getElementById(`edit-ser-${i}`).value,
+                            valor: document.getElementById(`edit-val-${i}`).value,
+                            peso: document.getElementById(`edit-peso-${i}`).value,
+                            unidad: document.getElementById(`edit-un-${i}`).value,
+                            id: currentId
+                        });
+                    }
                 });
 
                 const payload = { action: 'edit_session', fecha: data.fechaCompleta, idsOriginales: idsOriginales, newRecords: newRecords };
                 
                 try {
                     await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                    alert("Sesión actualizada. Los cambios se verán reflejados al reiniciar la app.");
+                    alert("Sesión actualizada correctamente.");
                     cerrarSheet();
-                    inicializar(); // Refrescar info
+                    inicializar(); 
                 } catch(e) { alert("Error al guardar."); document.getElementById('btn-guardar-edicion').innerText = "Guardar Cambios"; }
             };
+        }
+
+        function borrarFilaEditor(i) {
+            document.getElementById(`edit-row-${i}`).style.display = 'none';
+            document.getElementById(`edit-id-${i}`).value = 'DELETED';
         }
 
         function cerrarSheet() {
@@ -561,9 +572,6 @@
             });
         }
 
-        /* --- MOTOR DE RUTINAS CON ESTADO LOCAL Y UUID --- */
-
-        // Captura todo lo que ves en pantalla y lo guarda en el LocalStorage
         function guardarEstadoLocalDesdeDOM() {
             if (!entrenamientoEnCurso) return;
             localState.seriesTotales = seriesTotales;
@@ -603,7 +611,7 @@
             localState = { enCurso: true, rutinaNom: nombreRutina, rutinaActiva: rutinaActiva, ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
             
             navegarA('workout');
-            renderizarListaEntrenamiento(true); // true = generar desde 0
+            renderizarListaEntrenamiento(true); 
             guardarEstadoLocalDesdeDOM();
             actualizarProgreso();
         }
@@ -614,8 +622,7 @@
             seriesCompletadas = localState.seriesCompletadas;
             entrenamientoEnCurso = true;
             
-            navegarA('workout');
-            renderizarListaEntrenamiento(false); // false = restaurar desde localState
+            renderizarListaEntrenamiento(false); 
             actualizarProgreso();
         }
 
@@ -725,7 +732,7 @@
 
             const lastRow = rows[rows.length - 1];
             if (lastRow.classList.contains('completed')) {
-                alert("No puedes eliminar una serie que ya marcaste como completada. Desmárcala dándole al botón de '✔' primero.");
+                alert("No puedes eliminar una serie completada. Desmárcala dándole al botón de '✔' primero.");
                 return;
             }
 
@@ -774,7 +781,6 @@
                 document.getElementById(`peso-${indexEj}-${indexSerie}`).disabled = false;
                 document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = false;
                 
-                // Sacar de la cola si desmarca (DEDUPLICACION ACTIVA Y CORREGIDA)
                 offlineQueue = offlineQueue.filter(req => req.id !== idInp);
                 localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
 
@@ -791,7 +797,6 @@
 
             if(unidadInp === 'minutos' || unidadInp === 'segundos') iniciarTimerActivo(indexEj, valorInp, unidadInp);
 
-            // AHORA MANDAMOS EL UUID EXACTO GENERADO AL INICIO DE LA SERIE
             offlineQueue.push({ id: idInp, fecha: new Date().toLocaleDateString('es-ES'), ejercicio: ej, serie: serieVal, valor: valorInp, peso: pesoInp || 'N/A', unidad: unidadInp });
             localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
             
@@ -800,7 +805,7 @@
             document.getElementById(`peso-${indexEj}-${indexSerie}`).disabled = true;
             document.getElementById(`unidad-${indexEj}-${indexSerie}`).disabled = true;
 
-            seriesCompletadas++; actualizarProgreso(); iniciarDescansoGlobal(90); actualizarEstadoRed();
+            seriesCompletadas++; actualizarProgreso(); iniciarDescansoGlobal(90); 
             verificarEstadoTarjeta(indexEj); guardarEstadoLocalDesdeDOM();
         }
 
@@ -848,14 +853,13 @@
             const comentarios = document.getElementById('resumen-comentarios').value;
             if(!tiempo) return alert("Por favor, ingresa el tiempo total.");
 
-            offlineQueue.push({ type: 'summary', id: Date.now().toString(), fecha: new Date().toLocaleDateString('es-ES'), rutina: rutinaActiva[0].rutina, tiempo: tiempo, comentarios: comentarios });
+            offlineQueue.push({ type: 'summary', id: Date.now().toString(), fecha: new Date().toLocaleDateString('es-ES'), rutina: localState.rutinaNom, tiempo: tiempo, comentarios: comentarios });
             localStorage.setItem('giam_queue', JSON.stringify(offlineQueue));
 
             cerrarModalResumen();
             document.getElementById('resumen-tiempo').value = '';
             document.getElementById('resumen-comentarios').value = '';
 
-            // LIQUIDAR ESTADOS LOCALES
             entrenamientoEnCurso = false;
             localState = { enCurso: false, rutinaNom: '', ejercicios: [], seriesTotales: 0, seriesCompletadas: 0 };
             localStorage.setItem('giam_state', JSON.stringify(localState));
@@ -869,23 +873,17 @@
         }
 
         async function sincronizarDatos() {
-            if (!navigator.onLine || offlineQueue.length === 0) { actualizarEstadoRed(); return; }
+            if (!navigator.onLine || offlineQueue.length === 0) return;
             try {
                 const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(offlineQueue) });
                 if ((await res.json()).status === 'ok') { offlineQueue = []; localStorage.setItem('giam_queue', '[]'); }
             } catch (e) {}
-            actualizarEstadoRed();
-        }
-
-        function actualizarEstadoRed() {
-            document.getElementById('sync-status').innerText = navigator.onLine ? `Sincronizado. Pendientes: ${offlineQueue.length}` : `Sin conexión. Cola: ${offlineQueue.length}`;
         }
 
         function abrirModal(src) { document.getElementById('modal-img').src = src; document.getElementById('media-modal').style.display = 'flex'; }
         function cerrarModal() { document.getElementById('media-modal').style.display = 'none'; }
 
         window.addEventListener('online', sincronizarDatos);
-        window.addEventListener('offline', actualizarEstadoRed);
         inicializar();
     </script>
 </body>
