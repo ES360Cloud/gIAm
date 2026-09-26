@@ -89,7 +89,10 @@
 <!-- ============ DASHBOARD ============ -->
 <div id="pantalla-dashboard" class="pantalla">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <img src="https://i.ibb.co/GfNVsGmY/e4bf9f94-cf91-4f27-99cb-a3b90e174009-removebg-preview.png" alt="gIAm" style="height:30px">
+    <div style="display:flex;align-items:flex-end;gap:6px">
+      <img src="https://i.ibb.co/GfNVsGmY/e4bf9f94-cf91-4f27-99cb-a3b90e174009-removebg-preview.png" alt="gIAm" style="height:30px">
+      <span class="mono" style="font-size:9px;color:#3F4A50;padding-bottom:3px" id="version"></span>
+    </div>
     <span class="mono muted" style="font-size:12px" id="fecha-hoy"></span>
   </div>
   <div id="sync-dash" class="muted" style="font-size:11px;margin-bottom:12px"></div>
@@ -110,7 +113,13 @@
   <div class="bloque-tit" style="margin-top:0">Últimos 28 días · tocá un día para ver o corregir</div>
   <div id="heatmap" class="hm"></div>
 
-  <div class="bloque-tit">Volumen semanal por grupo</div>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div class="bloque-tit">Volumen por grupo</div>
+    <div style="display:flex;gap:5px">
+      <button class="chip sel" id="per-semana" onclick="cambiarPeriodo('semana')" style="padding:5px 11px;font-size:11px">Semana</button>
+      <button class="chip" id="per-mes" onclick="cambiarPeriodo('mes')" style="padding:5px 11px;font-size:11px">Mes</button>
+    </div>
+  </div>
   <div id="por-grupo" class="tarjeta"></div>
 
   <div class="bloque-tit">Tus rutinas</div>
@@ -131,7 +140,12 @@
         <select id="f-mes" onchange="aplicarFiltro()"></select>
         <select id="f-rutina" onchange="aplicarFiltro()"></select>
       </div>
-      <select id="f-ejercicio" onchange="aplicarFiltro()" style="margin-bottom:11px"></select>
+      <select id="f-ejercicio" onchange="aplicarFiltro()" style="margin-bottom:9px"></select>
+      <div class="chips" style="margin-bottom:11px">
+        <button class="chip sel" id="rg-todo" onclick="cambiarRango('todo')" style="padding:6px 12px;font-size:12px">Todo</button>
+        <button class="chip" id="rg-mes" onclick="cambiarRango('mes')" style="padding:6px 12px;font-size:12px">Último mes</button>
+        <button class="chip" id="rg-semana" onclick="cambiarRango('semana')" style="padding:6px 12px;font-size:12px">Última semana</button>
+      </div>
       <div id="graf-filtro"></div>
     </div>
   </div>
@@ -265,7 +279,8 @@ function fechaStr(d){return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()
 /* ---------- estado ---------- */
 let datosApp=null, sesion=null, tIntervalo=null, sincronizando=false;
 let cronoTipo='descanso', cronoRestante=0, cronoActivo=false, wakeLock=null;
-let diaEditando=null;
+let diaEditando=null, periodoGrupo='semana', rangoFiltro='todo';
+const VERSION='v3.1';
 
 /* ---------- audio ---------- */
 let audioCtx=null;
@@ -347,14 +362,55 @@ function sparkline(v){
 }
 function graficoGrande(f,v){
   if(!v||v.length<2)return '<p class="muted" style="font-size:13px">No hay suficientes sesiones para graficar.</p>';
-  const mx=Math.max.apply(null,v),mn=Math.min.apply(null,v),rg=(mx-mn)||1,w=320,h=120,pd=12;
-  const P=v.map((x,i)=>({x:pd+(i/(v.length-1))*(w-pd*2),y:h-pd-((x-mn)/rg)*(h-pd*2)}));
+  const mx=Math.max.apply(null,v), mn=Math.min.apply(null,v);
+  // margen del 8% arriba y abajo para que la linea no toque los bordes
+  const pad=((mx-mn)||mx||1)*0.08;
+  const top=mx+pad, bot=Math.max(0,mn-pad), rg=(top-bot)||1;
+  const w=320,h=150,ml=34,mr=8,mt=10,mb=22;
+  const iw=w-ml-mr, ih=h-mt-mb;
+  const X=i=>ml+(i/(v.length-1))*iw;
+  const Y=x=>mt+ih-((x-bot)/rg)*ih;
+
+  const P=v.map((x,i)=>({x:X(i),y:Y(x)}));
   const line=P.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
-  const dots=P.map((p,i)=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.2" fill="#4FB8A6"><title>'+fmt(v[i])+'</title></circle>').join('');
-  return '<svg width="100%" viewBox="0 0 '+w+' '+h+'" style="display:block"><polyline points="'+line+
-    '" fill="none" stroke="#4FB8A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'</svg>'+
-    '<div class="mono muted" style="display:flex;font-size:9px;margin-top:5px">'+
-    f.map(x=>'<span style="flex:1;text-align:center">'+esc(x)+'</span>').join('')+'</div>';
+  const area=ml+','+(mt+ih)+' '+line+' '+(ml+iw)+','+(mt+ih);
+
+  // grilla horizontal en 3 niveles con su etiqueta
+  let grid='';
+  for(let k=0;k<=2;k++){
+    const val=bot+(rg*k/2), y=Y(val);
+    grid+='<line x1="'+ml+'" y1="'+y.toFixed(1)+'" x2="'+(ml+iw)+'" y2="'+y.toFixed(1)+'" stroke="#1E272C" stroke-width="1"/>'+
+      '<text x="'+(ml-5)+'" y="'+(y+3).toFixed(1)+'" text-anchor="end" font-size="8" fill="#5C666B" font-family="IBM Plex Mono,monospace">'+fmt(val)+'</text>';
+  }
+
+  // solo algunas etiquetas de fecha para que no se amontonen
+  const paso=Math.max(1,Math.ceil(v.length/5));
+  let labels='';
+  f.forEach((x,i)=>{
+    if(i%paso!==0&&i!==v.length-1)return;
+    labels+='<text x="'+X(i).toFixed(1)+'" y="'+(h-6)+'" text-anchor="middle" font-size="8" fill="#5C666B" font-family="IBM Plex Mono,monospace">'+esc(x)+'</text>';
+  });
+
+  const dots=P.map((p,i)=>{
+    const ult=(i===v.length-1);
+    return '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(ult?4.5:2.8)+'" fill="'+(ult?'#DFF4EE':'#4FB8A6')+
+      '" stroke="'+(ult?'#4FB8A6':'none')+'" stroke-width="2"><title>'+esc(f[i])+': '+fmt(v[i])+'</title></circle>';
+  }).join('');
+
+  const delta=v[v.length-1]-v[0];
+  const pctd=v[0]>0?Math.round(delta/v[0]*100):0;
+  const resumen='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">'+
+    '<span class="mono" style="font-size:15px">'+fmt(v[v.length-1])+'</span>'+
+    '<span class="mono" style="font-size:11px;color:'+(delta>=0?'#4FB8A6':'#C2624A')+'">'+
+    (delta>=0?'▲':'▼')+Math.abs(pctd)+'% vs inicio</span></div>';
+
+  return resumen+'<svg width="100%" viewBox="0 0 '+w+' '+h+'" style="display:block">'+
+    '<defs><linearGradient id="gfill" x1="0" x2="0" y1="0" y2="1">'+
+    '<stop offset="0%" stop-color="#4FB8A6" stop-opacity="0.22"/>'+
+    '<stop offset="100%" stop-color="#4FB8A6" stop-opacity="0"/></linearGradient></defs>'+
+    grid+'<polygon points="'+area+'" fill="url(#gfill)"/>'+
+    '<polyline points="'+line+'" fill="none" stroke="#4FB8A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
+    dots+labels+'</svg>';
 }
 
 /* ---------- dashboard ---------- */
@@ -383,11 +439,19 @@ function statsSemana(){
     if(dd>=0&&dd<7)vs+=v; if(dd>=7&&dd<14)va+=v; if(dd>=0&&dd<30)sm++;});
   return {vs,va,sm};
 }
+function cambiarPeriodo(p){
+  periodoGrupo=p;
+  document.getElementById('per-semana').classList.toggle('sel',p==='semana');
+  document.getElementById('per-mes').classList.toggle('sel',p==='mes');
+  renderPorGrupo();
+}
 function renderPorGrupo(){
-  const g=(datosApp&&datosApp.volumenPorGrupo)||{};
+  const raw=(datosApp&&datosApp.volumenPorGrupo)||{};
+  // compatibilidad: el backend viejo mandaba un objeto plano
+  const g=(raw.semana||raw.mes)?(raw[periodoGrupo]||{}):raw;
   const keys=Object.keys(g).filter(k=>g[k]>0).sort((a,b)=>g[b]-g[a]);
   const c=document.getElementById('por-grupo');
-  if(!keys.length){c.innerHTML='<div class="muted" style="font-size:12px">Sin registros en los últimos 7 días.</div>';return;}
+  if(!keys.length){c.innerHTML='<div class="muted" style="font-size:12px">Sin registros en este período.</div>';return;}
   const max=g[keys[0]];
   c.innerHTML=keys.map(k=>'<div style="margin-bottom:8px">'+
     '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">'+
@@ -452,6 +516,11 @@ function renderHistoria(){
     '<div class="muted" style="font-size:12px;line-height:1.5">'+esc(r.ia||'')+'</div></div>').join('')
     ||'<p class="muted">Sin reportes.</p>';
 }
+function cambiarRango(r){
+  rangoFiltro=r;
+  ['todo','mes','semana'].forEach(k=>{document.getElementById('rg-'+k).classList.toggle('sel',k===r);});
+  aplicarFiltro();
+}
 async function aplicarFiltro(){
   const cont=document.getElementById('graf-filtro');
   cont.innerHTML='<p class="muted" style="font-size:12px">Cargando...</p>';
@@ -460,7 +529,8 @@ async function aplicarFiltro(){
     const r=await fetch(APPS_SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'filter',
       mes:document.getElementById('f-mes').value,
       rutinaId:document.getElementById('f-rutina').value,
-      ejercicio:document.getElementById('f-ejercicio').value})});
+      ejercicio:document.getElementById('f-ejercicio').value,
+      rango:rangoFiltro})});
     const d=await r.json();
     cont.innerHTML=(d.status==='ok')?graficoGrande(d.fechas,d.volumen):'<p class="muted" style="font-size:12px">No se pudo cargar.</p>';
   }catch(e){cont.innerHTML='<p class="muted" style="font-size:12px">No se pudo cargar.</p>';}
@@ -769,6 +839,7 @@ function cerrarLightbox(){document.getElementById('lightbox').style.display='non
 
 /* ---------- arranque ---------- */
 document.addEventListener('DOMContentLoaded',async()=>{
+  document.getElementById('version').textContent=VERSION;
   if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
   document.getElementById('lista-rutinas').addEventListener('click',e=>{
     const f=e.target.closest('.fila-rutina');if(f)abrirDetalle(f.dataset.rid,f.dataset.rnom);});
