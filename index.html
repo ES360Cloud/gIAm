@@ -113,11 +113,12 @@
   <div class="bloque-tit" style="margin-top:0">Últimos 28 días · tocá un día para ver o corregir</div>
   <div id="heatmap" class="hm"></div>
 
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <div class="bloque-tit">Volumen por grupo</div>
-    <div style="display:flex;gap:5px">
-      <button class="chip sel" id="per-semana" onclick="cambiarPeriodo('semana')" style="padding:5px 11px;font-size:11px">Semana</button>
-      <button class="chip" id="per-mes" onclick="cambiarPeriodo('mes')" style="padding:5px 11px;font-size:11px">Mes</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <div class="bloque-tit">Volumen por zona</div>
+    <div style="display:flex;gap:4px">
+      <button class="chip sel" id="per-semana" onclick="cambiarPeriodo('semana')" style="padding:5px 10px;font-size:11px">Semana</button>
+      <button class="chip" id="per-mes" onclick="cambiarPeriodo('mes')" style="padding:5px 10px;font-size:11px">Mes</button>
+      <button class="chip" id="per-historico" onclick="cambiarPeriodo('historico')" style="padding:5px 10px;font-size:11px">Histórico</button>
     </div>
   </div>
   <div id="por-grupo" class="tarjeta"></div>
@@ -279,8 +280,8 @@ function fechaStr(d){return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()
 /* ---------- estado ---------- */
 let datosApp=null, sesion=null, tIntervalo=null, sincronizando=false;
 let cronoTipo='descanso', cronoRestante=0, cronoActivo=false, wakeLock=null;
-let diaEditando=null, periodoGrupo='semana', rangoFiltro='todo';
-const VERSION='v3.1';
+let diaEditando=null, periodoGrupo='semana', rangoFiltro='todo', zonaAbierta=null;
+const VERSION='v3.2';
 
 /* ---------- audio ---------- */
 let audioCtx=null;
@@ -441,23 +442,66 @@ function statsSemana(){
 }
 function cambiarPeriodo(p){
   periodoGrupo=p;
-  document.getElementById('per-semana').classList.toggle('sel',p==='semana');
-  document.getElementById('per-mes').classList.toggle('sel',p==='mes');
+  ['semana','mes','historico'].forEach(k=>{
+    const b=document.getElementById('per-'+k);if(b)b.classList.toggle('sel',k===p);});
+  renderPorGrupo();
+}
+function toggleZona(z){
+  zonaAbierta=(zonaAbierta===z)?null:z;
   renderPorGrupo();
 }
 function renderPorGrupo(){
-  const raw=(datosApp&&datosApp.volumenPorGrupo)||{};
-  // compatibilidad: el backend viejo mandaba un objeto plano
-  const g=(raw.semana||raw.mes)?(raw[periodoGrupo]||{}):raw;
-  const keys=Object.keys(g).filter(k=>g[k]>0).sort((a,b)=>g[b]-g[a]);
   const c=document.getElementById('por-grupo');
+  if(!datosApp){c.innerHTML='';return;}
+
+  // compatibilidad con el backend anterior
+  if(!datosApp.zonas){
+    const raw=datosApp.volumenPorGrupo||{};
+    const g=(raw.semana||raw.mes)?(raw[periodoGrupo]||raw.semana||{}):raw;
+    const ks=Object.keys(g).filter(k=>g[k]>0).sort((a,b)=>g[b]-g[a]);
+    if(!ks.length){c.innerHTML='<div class="muted" style="font-size:12px">Sin registros en este período.</div>';return;}
+    const mx=g[ks[0]];
+    c.innerHTML=ks.map(k=>barra(k,g[k],mx,null)).join('');
+    return;
+  }
+
+  const z=datosApp.zonas[periodoGrupo]||{};
+  const prev=(datosApp.zonasPrev&&datosApp.zonasPrev[periodoGrupo])||null;
+  const grupos=datosApp.grupos[periodoGrupo]||{};
+  const zdg=datosApp.zonaDeGrupo||{};
+
+  const keys=Object.keys(z).filter(k=>z[k]>0).sort((a,b)=>z[b]-z[a]);
   if(!keys.length){c.innerHTML='<div class="muted" style="font-size:12px">Sin registros en este período.</div>';return;}
-  const max=g[keys[0]];
-  c.innerHTML=keys.map(k=>'<div style="margin-bottom:8px">'+
-    '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">'+
-    '<span>'+esc(k)+'</span><span class="mono muted">'+fmt(g[k])+'</span></div>'+
-    '<div style="height:4px;background:#12181C;border-radius:2px;overflow:hidden">'+
-    '<div style="height:100%;width:'+Math.round(g[k]/max*100)+'%;background:#4FB8A6"></div></div></div>').join('');
+  const max=z[keys[0]];
+
+  c.innerHTML=keys.map(k=>{
+    const delta=prev?calcDelta(z[k],prev[k]||0):null;
+    let html='<div onclick="toggleZona(\''+esc(k).replace(/'/g,"\\'")+'\')" style="cursor:pointer">'+barra(k,z[k],max,delta)+'</div>';
+    if(zonaAbierta===k){
+      const sub=Object.keys(grupos).filter(g=>(zdg[g]||'')===k&&grupos[g]>0).sort((a,b)=>grupos[b]-grupos[a]);
+      if(sub.length>1){
+        const smax=grupos[sub[0]];
+        html+='<div style="padding:2px 0 10px 12px;border-left:1px solid #222B30;margin:-4px 0 8px 3px">'+
+          sub.map(g=>'<div style="display:flex;justify-content:space-between;font-size:10px;padding:3px 0">'+
+            '<span class="muted">'+esc(g)+'</span><span class="mono muted">'+fmt(grupos[g])+'</span></div>').join('')+'</div>';
+      }
+    }
+    return html;
+  }).join('');
+}
+function calcDelta(act,ant){
+  if(!ant||ant<=0)return null;
+  return Math.round((act-ant)/ant*100);
+}
+function barra(nombre,valor,max,delta){
+  const d=(delta===null||delta===undefined)?''
+    :'<span class="mono" style="font-size:10px;color:'+(delta>=0?'#4FB8A6':'#C2624A')+';margin-left:6px">'+
+      (delta>=0?'▲':'▼')+Math.abs(delta)+'%</span>';
+  return '<div style="margin-bottom:9px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:11px;margin-bottom:3px">'+
+    '<span>'+esc(nombre)+d+'</span><span class="mono muted">'+fmt(valor)+'</span></div>'+
+    '<div style="height:5px;background:#12181C;border-radius:3px;overflow:hidden">'+
+    '<div style="height:100%;width:'+Math.round(valor/max*100)+'%;background:#4FB8A6;border-radius:3px"></div></div></div>';
 }
 function renderDashboard(){
   document.getElementById('fecha-hoy').textContent=new Date().toLocaleDateString('es-AR',{day:'numeric',month:'short'});
